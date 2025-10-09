@@ -1,0 +1,101 @@
+# Ignora arquivos gerados pelo sistema operacional, IDEs, compiladores C/C++ (Pico SDK)
+# e ferramentas de síntese/simulação de FPGA (SystemVerilog).
+
+# Arquivos de Sistema Operacional
+###################################
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Arquivos de IDEs e Editores de Código
+#########################################
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# CLion / JetBrains
+.idea/
+
+# Eclipse
+.project
+.cproject
+.settings/
+
+# Arquivos do Raspberry Pi Pico (C/C++ SDK com CMake)
+######################################################
+# Diretório de build principal
+build/
+cmake-build-*/
+
+# Arquivos gerados pelo CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+
+# Arquivos compilados e de linkagem
+*.o
+*.a
+*.so
+*.d
+
+# Firmwares e executáveis
+*.elf
+*.uf2
+*.bin
+*.hex
+*.map
+
+# Arquivos do FPGA (SystemVerilog)
+###################################
+# Diretórios de saída e de banco de dados das ferramentas (Quartus, Vivado, etc.)
+output_files/
+db/
+incremental_db/
+synthesis/
+simulation/
+*.qws
+
+# Arquivos de projeto específicos da ferramenta que não devem ser versionados
+*.qpf
+*.bak
+
+# Logs, relatórios e arquivos temporários
+*.log
+*.rpt
+*.summary
+*.srr
+*.tcl.log
+*.vcd
+*.wlf
+*.wdb
+
+# Arquivos de programação do FPGA
+*.sof
+*.pof
+*.rbf
+*.svf
+*.bit
+*.bin
+
+# Arquivos gerados pela simulação
+transcript
+vsim.wlf
+work/
+
+# Bibliotecas pré-compiladas
+*_lib/
+
+# Arquivos diversos de ferramentas
+c5_pin.txt
+*_assignment_defaults.qdf
+
+# Arquivos de dependência e temporários
+#########################################
+*~
+*.swp
+*.swo
