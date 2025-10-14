@@ -1,14 +1,10 @@
 #Caminhos para as pastas includes
-# set(COMPONENTS_PATH ${CMAKE_CURRENT_LIST_DIR}/../inc/components)
-# set(PROTOCOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/../inc/protocols)
-# set(TASKS_PATH ${CMAKE_CURRENT_LIST_DIR}/../inc/tasks)
+set(COMPONENTS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/components)
+set(PROTOCOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/protocols)
+set(TASKS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/tasks)
 
 # Agrupamento de fontes por componente
 #ANALOGIC
-# set(ADC_PROTOCOL_SOURCES
-#     ${CMAKE_CURRENT_LIST_DIR}/protocols/adc/adc_configs.c
-# )
-
 # set(ANALOG_COMPONENT_SOURCES
 #     ${CMAKE_CURRENT_LIST_DIR}/components/analog/guvas12.c
 #     ${CMAKE_CURRENT_LIST_DIR}/components/analog/mq135.c
@@ -17,28 +13,18 @@
 # )
 
 #DIGITAL
-# set(DIGITAL_COMPONENT_SOURCES
-#     ${CMAKE_CURRENT_LIST_DIR}/components/digital/buttons.c
-#     ${CMAKE_CURRENT_LIST_DIR}/components/digital/water_level.c
-#     ${CMAKE_CURRENT_LIST_DIR}/components/digital/water_pump.c
-# )
+set(DIGITAL_COMPONENT_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/components/digital/buttons.c
+)
 
 #I2C
-# set(I2C_PROTOCOL_SOURCES
-#     ${CMAKE_CURRENT_LIST_DIR}/protocols/i2c/i2c_configs.c
-# )
+set(I2C_PROTOCOL_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/protocols/i2c/i2c_configs.c
+)
 
-# set(I2C_COMPONENT_SOURCES
-#     ${CMAKE_CURRENT_LIST_DIR}/components/i2c/ads1115.c
-#     ${CMAKE_CURRENT_LIST_DIR}/components/i2c/aht10.c
-#     ${CMAKE_CURRENT_LIST_DIR}/components/i2c/tsl2591.c
-# )
-
-#PWM
-# set(PWM_COMPONENT_SOURCES
-#     ${CMAKE_CURRENT_LIST_DIR}/components/pwm/buzzer.c
-#     ${CMAKE_CURRENT_LIST_DIR}/components/pwm/rgb.c
-# )
+set(I2C_COMPONENT_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/components/i2c/ads1115.c
+)
 
 # Agrupando de fontes por tarefas
 # set(TASK_SOURCES
@@ -50,12 +36,10 @@
 
 add_executable(filtercore
     main.c
-    # ${I2C_PROTOCOL_SOURCES}
-    # ${I2C_COMPONENT_SOURCES}
-    # ${ADC_PROTOCOL_SOURCES}
+    ${I2C_PROTOCOL_SOURCES}
+    ${I2C_COMPONENT_SOURCES}
     # ${ANALOG_COMPONENT_SOURCES}
-    # ${DIGITAL_COMPONENT_SOURCES}
-    # ${PWM_COMPONENT_SOURCES}
+    ${DIGITAL_COMPONENT_SOURCES}
     # ${TASK_SOURCES}
 )
 
@@ -69,13 +53,11 @@ target_sources(filtercore PRIVATE
 target_include_directories(filtercore PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/../lib
-    # ${PROTOCOLS_PATH}/i2c
-    # ${COMPONENTS_PATH}/i2c
-    # ${PROTOCOLS_PATH}/adc
-    # ${COMPONENTS_PATH}/analog
-    # ${COMPONENTS_PATH}/digital
-    # ${COMPONENTS_PATH}/pwm
-    # ${TASKS_PATH}     
+    ${PROTOCOLS_PATH}/i2c
+    ${COMPONENTS_PATH}/i2c
+    ${COMPONENTS_PATH}/analog
+    ${COMPONENTS_PATH}/digital
+    ${TASKS_PATH}     
 )
 
 target_link_libraries(filtercore 
