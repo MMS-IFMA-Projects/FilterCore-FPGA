@@ -28,6 +28,8 @@ desktop.ini
 ######################################################
 # Diretório de build principal
 build/
+Debug/
+Release/
 cmake-build-*/
 
 # Arquivos gerados pelo CMake
