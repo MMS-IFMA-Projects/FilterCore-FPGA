@@ -1,5 +1,5 @@
 # FilterCore FPGA
-- Módulo FPGA: EPC5 LFE5U-45 colorlight i9
+- Módulo FPGA: ECP5 LFE5U-45 colorlight i9
 - Linguagem: System Verilog
 ------------------------------------------------------------
 # Autores:
