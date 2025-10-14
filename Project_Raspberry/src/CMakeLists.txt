@@ -5,12 +5,11 @@ set(TASKS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/tasks)
 
 # Agrupamento de fontes por componente
 #ANALOGIC
-# set(ANALOG_COMPONENT_SOURCES
-#     ${CMAKE_CURRENT_LIST_DIR}/components/analog/guvas12.c
-#     ${CMAKE_CURRENT_LIST_DIR}/components/analog/mq135.c
-#     ${CMAKE_CURRENT_LIST_DIR}/components/analog/soil_moisture.c
-#     ${CMAKE_CURRENT_LIST_DIR}/components/analog/joystick.c
-# )
+set(ANALOG_COMPONENT_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/components/analog/ds18b20.c
+    ${CMAKE_CURRENT_LIST_DIR}/components/analog/ph4502c.c
+    ${CMAKE_CURRENT_LIST_DIR}/components/analog/tds_meter.c
+)
 
 #DIGITAL
 set(DIGITAL_COMPONENT_SOURCES
@@ -38,7 +37,7 @@ add_executable(filtercore
     main.c
     ${I2C_PROTOCOL_SOURCES}
     ${I2C_COMPONENT_SOURCES}
-    # ${ANALOG_COMPONENT_SOURCES}
+    ${ANALOG_COMPONENT_SOURCES}
     ${DIGITAL_COMPONENT_SOURCES}
     # ${TASK_SOURCES}
 )
