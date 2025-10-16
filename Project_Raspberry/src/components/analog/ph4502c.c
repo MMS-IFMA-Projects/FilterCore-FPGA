@@ -8,9 +8,10 @@
 #define CALIBRATION_OFFSET 20.5f
 #define VOLTS_TO_PH_SLOPE -5.70f
 
-static void sort_samples(int16_t* samples, int num_samples) {
-    for (int i = 0; i < num_samples - 1; i++) {
-        for (int j = 0; j < num_samples - i - 1; j++) {
+static void sort_samples(int16_t* samples) {
+    // Simple bubble sort
+    for (int i = 0; i < NUM_SAMPLES - 1; i++) {
+        for (int j = 0; j < NUM_SAMPLES - i - 1; j++) {
             if (samples[j] > samples[j + 1]) {
                 int16_t temp = samples[j];
                 samples[j] = samples[j + 1];
@@ -31,7 +32,7 @@ ph_t ph4502c_read_ph(void) {
     }
 
     // Sort the samples so we can discard the highest and lowest ones.
-    sort_samples(samples, NUM_SAMPLES);
+    sort_samples(samples);
     
     // Calculate the average, discarding the lowest 20% and highest 20%.
     for (int i = 2; i < NUM_SAMPLES - 2; i++) {
