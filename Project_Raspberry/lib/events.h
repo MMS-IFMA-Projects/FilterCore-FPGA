@@ -14,4 +14,9 @@ typedef struct{
     ppm_t ppm;
 } sensors_data_t;
 
+extern TaskHandle_t handle_display;
+extern QueueHandle_t queue_sensors_data;
+extern QueueHandle_t queue_notifications;
+
+
 #endif // EVENTS_H

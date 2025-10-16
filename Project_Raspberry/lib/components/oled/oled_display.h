@@ -25,8 +25,6 @@ typedef struct {
     uint8_t port_buffer[2];
 } ssd1306_t;
 
-extern ssd1306_t oled;
-
 bool oled_init(ssd1306_t* oled);
 
 void oled_clear(ssd1306_t* oled);
@@ -34,5 +32,7 @@ void oled_clear(ssd1306_t* oled);
 void oled_render(ssd1306_t* oled);
 
 void ssd1306_draw_string(uint8_t *buffer, int16_t x, int16_t y, const char *str, uint8_t width, uint8_t height);
+
+extern ssd1306_t oled;
 
 #endif //OLED_DISPLAY_H
