@@ -3,6 +3,6 @@
 
 #include "units.h"
 
-ppm_t tds_meter_read_ppm(void);
+ppm_t tds_meter_read_ppm(celsius_t current_temperature);
 
 #endif // TDS Meter
