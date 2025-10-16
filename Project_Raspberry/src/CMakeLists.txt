@@ -25,6 +25,12 @@ set(I2C_COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/components/i2c/ads1115.c
 )
 
+#OLED
+set(OLED_COMPONENT_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/components/oled/oled_display.c
+    ${CMAKE_CURRENT_LIST_DIR}/components/oled/ssd1306_text.c
+)
+
 # Agrupando de fontes por tarefas
 # set(TASK_SOURCES
 #     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_dig_water_level.c
@@ -39,6 +45,7 @@ add_executable(filtercore
     ${I2C_COMPONENT_SOURCES}
     ${ANALOG_COMPONENT_SOURCES}
     ${DIGITAL_COMPONENT_SOURCES}
+    ${OLED_COMPONENT_SOURCES}
     # ${TASK_SOURCES}
 )
 
@@ -56,17 +63,20 @@ target_include_directories(filtercore PRIVATE
     ${COMPONENTS_PATH}/i2c
     ${COMPONENTS_PATH}/analog
     ${COMPONENTS_PATH}/digital
+    ${COMPONENTS_PATH}/oled
     ${TASKS_PATH}     
 )
 
 target_link_libraries(filtercore 
-    pico_stdlib 
+    pico_stdlib
+    pico_time 
     FreeRTOS-Kernel
     hardware_i2c
     hardware_adc
     hardware_dma
     hardware_pwm
     hardware_clocks
+    hardware_gpio
 )
 
 pico_add_extra_outputs(filtercore)

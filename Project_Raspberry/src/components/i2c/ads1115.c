@@ -23,16 +23,16 @@ int16_t ads1115_read_adc(uint8_t channel) {
     uint8_t config_lsb = 0b10000011;
 
     uint8_t write_buf[3] = {0x01, config_msb, config_lsb}; // Aponta para o reg de config e escreve
-    i2c_write_blocking(I2C_PORT, ADS1115_ADDR, write_buf, 3, false);
+    i2c_write_blocking(I2C0_PORT, ADS1115_ADDR, write_buf, 3, false);
 
     vTaskDelay(pdMS_TO_TICKS(2));
 
     // Aponta para o registrador de conversão (0x00) para ler
     uint8_t pointer_reg = 0x00;
-    i2c_write_blocking(I2C_PORT, ADS1115_ADDR, &pointer_reg, 1, false);
+    i2c_write_blocking(I2C0_PORT, ADS1115_ADDR, &pointer_reg, 1, false);
 
     uint8_t read_buf[2];
-    i2c_read_blocking(I2C_PORT, ADS1115_ADDR, read_buf, 2, false);
+    i2c_read_blocking(I2C0_PORT, ADS1115_ADDR, read_buf, 2, false);
 
     return (int16_t)((read_buf[0] << 8) | read_buf[1]);
 }
