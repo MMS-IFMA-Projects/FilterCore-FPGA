@@ -28,16 +28,14 @@ set(I2C_COMPONENT_SOURCES
 #OLED
 set(OLED_COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/oled_display.c
+    ${CMAKE_CURRENT_LIST_DIR}/components/oled/oled_environment.c
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/ssd1306_text.c
 )
 
-# Agrupando de fontes por tarefas
-# set(TASK_SOURCES
-#     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_dig_water_level.c
-#     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_i2c_analogs.c 
-#     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_i2c_brightness.c 
-#     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_i2c_temperature_rh.c
-# )
+Agrupando de fontes por tarefas
+set(TASK_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_display.c
+)
 
 add_executable(filtercore
     main.c
@@ -46,7 +44,7 @@ add_executable(filtercore
     ${ANALOG_COMPONENT_SOURCES}
     ${DIGITAL_COMPONENT_SOURCES}
     ${OLED_COMPONENT_SOURCES}
-    # ${TASK_SOURCES}
+    ${TASK_SOURCES}
 )
 
 # Corrige a saída para build/ em vez de build/src/
