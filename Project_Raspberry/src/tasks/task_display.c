@@ -2,9 +2,12 @@
 #include "events.h"
 #include "oled_environment.h"
 #include "oled_prints.h"
+
+// Screens
 #include "default_screen.h"
 #include "ph_screen.h"
 #include "tds_screen.h"
+#include "temperature_screen.h"
 
 #define DISPLAY_INTERVAL_MS 250
 
@@ -37,6 +40,7 @@ static void task_display(void *params) {
                     if(sensors_data_available) show_tds_screen(latest_data);
                     break;
                 case TEMPERATURE_SCREEN:
+                    if(sensors_data_available) show_temperature_screen(latest_data);
                     break;
                 case NOTIFICATIONS_SCREEN:
                     break;
