@@ -24,5 +24,19 @@ int main(){
         while(true);
     }
 
+    // Creates queue for sensor data
+    queue_sensors_data = xQueueCreate(5, sizeof(sensors_data_t));
+    if(queue_sensors_data == NULL){
+        printf("Error creating sensor data queue!\n");
+        while(true);
+    }
+
+    // Creates queue for notifications
+    queue_notifications = xQueueCreate(3, sizeof(notification_t));
+    if(queue_notifications == NULL){
+        printf("Error creating notifications queue!\n");
+        while(true);
+    }
+
     while(true);
 }
