@@ -2,6 +2,7 @@
 #include "events.h"
 #include "oled_environment.h"
 #include "oled_prints.h"
+#include "default_screen.h"
 
 #define DISPLAY_INTERVAL_MS 250
 
@@ -20,8 +21,12 @@ static void task_display(void *params) {
     // Screen selection loop
     while(true){
         if(xSemaphoreTake(oled_mutex, pdMS_TO_TICKS(100))){
+            sensors_data_t latest_data = {0};
+            bool sensors_data_available = (xQueueReceive(queue_sensors_data, &latest_data, 0) == pdPASS);
+
             switch(current_screen){
                 case DEFAULT_SCREEN:
+                    if(sensors_data_available) show_default_screen(latest_data);
                     break;
                 case PH_SCREEN:
                     break;
@@ -33,7 +38,7 @@ static void task_display(void *params) {
                     break;
                 default:
                     oled_clear(&oled);
-                    print_text_center(&oled, "Invalid Screen", 3);
+                    print_text_center(&oled, "No data available", 3);
                     oled_render(&oled);
                     break;
             }
