@@ -5,4 +5,4 @@ ssd1306_t oled;
 
 SemaphoreHandle_t oled_mutex = NULL;
 
-volatile oled_screen_t current_screen = OLED_SCREEN;
+volatile oled_screen_t current_screen = DEFAULT_SCREEN;

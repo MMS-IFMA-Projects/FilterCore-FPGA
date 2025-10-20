@@ -39,6 +39,10 @@
     "raspberry-pi-pico.ninjaPath": "${HOME}/.pico-sdk/ninja/v1.12.1/ninja",
     "files.associations": {
         "events.h": "c",
-        "oled_display.h": "c"
+        "oled_display.h": "c",
+        "oled_screen.h": "c",
+        "ssd1306_text.h": "c",
+        "ssd1306_font.h": "c",
+        "oled_environment.h": "c"
     }
 }

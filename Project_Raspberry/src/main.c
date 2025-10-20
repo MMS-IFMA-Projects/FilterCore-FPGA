@@ -2,7 +2,6 @@
 #include "i2c_configs.h"
 #include "oled_environment.h"
 
-TaskHandle_t handle_display = NULL;
 QueueHandle_t queue_sensors_data = NULL;
 QueueHandle_t queue_notifications = NULL;
 

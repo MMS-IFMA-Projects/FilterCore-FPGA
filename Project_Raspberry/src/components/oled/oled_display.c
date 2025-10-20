@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "ssd1306_text.h"
 #include "hardware/gpio.h"
 
 static void ssd1306_send_command(ssd1306_t* oled, uint8_t command) {

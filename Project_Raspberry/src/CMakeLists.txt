@@ -29,6 +29,7 @@ set(I2C_COMPONENT_SOURCES
 set(OLED_COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/oled_display.c
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/oled_environment.c
+    ${CMAKE_CURRENT_LIST_DIR}/components/oled/oled_prints.c
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/ssd1306_text.c
 )
 
