@@ -7,7 +7,7 @@ void show_default_screen(sensors_data_t latest_data) {
     char text[32];
     int line = 0;
 
-    snprintf(text, sizeof(text), "Data Summary");
+    snprintf(text, sizeof(text), "DATA SUMMARY");
     print_text_center(&oled, text, line);
     line += SSD1306_CHAR_HEIGHT;
         

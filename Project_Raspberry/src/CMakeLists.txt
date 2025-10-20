@@ -70,6 +70,7 @@ target_include_directories(filtercore PRIVATE
     ${COMPONENTS_PATH}/analog
     ${COMPONENTS_PATH}/digital
     ${COMPONENTS_PATH}/oled
+    ${COMPONENTS_PATH}/oled/fonts
     ${SCREENS_PATH}
     ${TASKS_PATH}     
 )
