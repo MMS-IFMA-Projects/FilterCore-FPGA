@@ -44,6 +44,8 @@
         "ssd1306_text.h": "c",
         "ssd1306_font.h": "c",
         "oled_environment.h": "c",
-        "oled_prints.h": "c"
+        "oled_prints.h": "c",
+        "default_screen.h": "c",
+        "ds18b20.h": "c"
     }
 }

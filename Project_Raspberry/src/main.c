@@ -3,6 +3,7 @@
 #include "oled_environment.h"
 
 QueueHandle_t queue_sensors_data = NULL;
+QueueHandle_t queue_normalized_sensors_data = NULL;
 QueueHandle_t queue_notifications = NULL;
 
 int main(){
@@ -23,9 +24,16 @@ int main(){
         while(true);
     }
 
-    // Creates queue for sensor data
+    // Creates queue for sensors data
     queue_sensors_data = xQueueCreate(MAX_SENSORS_DATA, sizeof(sensors_data_t));
     if(queue_sensors_data == NULL){
+        printf("Error creating sensor data queue!\n");
+        while(true);
+    }
+
+    // Creates queue for normalized sensors data
+    queue_normalized_sensors_data = xQueueCreate(MAX_SENSORS_DATA, sizeof(normalized_sensors_data_t));
+    if(queue_normalized_sensors_data == NULL){
         printf("Error creating sensor data queue!\n");
         while(true);
     }

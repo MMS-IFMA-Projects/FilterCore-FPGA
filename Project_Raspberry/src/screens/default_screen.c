@@ -15,7 +15,7 @@ void show_default_screen(sensors_data_t latest_data) {
     print_text_left(&oled, text, line);
     line += SSD1306_CHAR_HEIGHT;
         
-    snprintf(text, sizeof(text), "PPM: %.2f", latest_data.ppm);
+    snprintf(text, sizeof(text), "PPM: %.2f", latest_data.tds);
     print_text_left(&oled, text, line);
     line += SSD1306_CHAR_HEIGHT;
 
