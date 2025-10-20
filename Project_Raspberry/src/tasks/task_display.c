@@ -4,6 +4,7 @@
 #include "oled_prints.h"
 #include "default_screen.h"
 #include "ph_screen.h"
+#include "tds_screen.h"
 
 #define DISPLAY_INTERVAL_MS 250
 
@@ -33,6 +34,7 @@ static void task_display(void *params) {
                     if(sensors_data_available) show_ph_screen(latest_data);
                     break;
                 case TDS_SCREEN:
+                    if(sensors_data_available) show_tds_screen(latest_data);
                     break;
                 case TEMPERATURE_SCREEN:
                     break;

@@ -37,6 +37,8 @@ set(OLED_COMPONENT_SOURCES
 #Agrupando telas para o OLED
 set(SCREENS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/screens/default_screen.c
+    ${CMAKE_CURRENT_LIST_DIR}/screens/ph_screen.c
+    ${CMAKE_CURRENT_LIST_DIR}/screens/tds_screen.c
 )
 
 #Agrupando de fontes por tarefas
