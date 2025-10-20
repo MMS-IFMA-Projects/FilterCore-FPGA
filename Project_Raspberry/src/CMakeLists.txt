@@ -32,7 +32,7 @@ set(OLED_COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/ssd1306_text.c
 )
 
-Agrupando de fontes por tarefas
+#Agrupando de fontes por tarefas
 set(TASK_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_display.c
 )
