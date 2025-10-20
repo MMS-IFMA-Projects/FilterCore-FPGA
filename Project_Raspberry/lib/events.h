@@ -8,11 +8,14 @@
 #include "queue.h"
 #include "units.h"
 
+#define MAX_NOTIFICATIONS 5
+#define MAX_SENSORS_DATA 5
+
 typedef enum {
     INFO,
     WARNING,
     ERROR
-} severity_t;
+} notification_type_t;
 
 typedef struct{
     celsius_t temperature;
@@ -22,8 +25,8 @@ typedef struct{
 } sensors_data_t;
 
 typedef struct{
-    severity_t severity;
-    char message[16];
+    notification_type_t type;
+    char message[22];
 } notification_t;
 
 extern TaskHandle_t handle_display;
