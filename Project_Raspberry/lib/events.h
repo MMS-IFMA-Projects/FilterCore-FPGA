@@ -9,7 +9,7 @@
 #include "units.h"
 
 #define MAX_NOTIFICATIONS 5
-#define MAX_SENSORS_DATA 5
+#define MAX_SENSORS_DATA 10
 
 typedef enum {
     INFO,
