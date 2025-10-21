@@ -10,6 +10,12 @@
 
 #define MAX_NOTIFICATIONS 5
 #define MAX_SENSORS_DATA 5
+#define MAX_TEMPERATURE_CELSIUS 30.0f
+#define MIN_TEMPERATURE_CELSIUS 24.0f
+#define MAX_PH 8.0f
+#define MIN_PH 6.0f
+#define MAX_DEFAULT_TDS 750.0f
+
 
 typedef enum {
     INFO,

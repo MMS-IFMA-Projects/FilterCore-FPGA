@@ -7,22 +7,27 @@
 
 #define SENSORS_INTERVAL_MS 125
 
-static normalized_sensors_data_t normalize_sensors_data(sensors_data_t data){
-    // Continuous data
-    celsius_t temperature = data.temperature;
-    ph_t ph = data.ph;
-    ppm_t tds = data.tds;
+static bool get_normalized_tds(sensors_data_t data){
+    ppm_t max_tds = MAX_DEFAULT_TDS;
 
+    // Linear functions for PH range
+    if(data.temperature >= 24.0f && data.temperature <= 30.0f){
+        if(data.ph >= 6.0f && data.ph < 6.5f) max_tds = (-16.67f * data.temperature) + 1300.0f;
+        if(data.ph >= 6.5f && data.ph < 7.5f) max_tds = (-33.33f * data.temperature) + 1575.0f;
+        if(data.ph >= 7.5f && data.ph <= 8.0f) max_tds = (-16.67f * data.temperature) + 950.0f;
+    }
+
+    return (data.tds > max_tds) ? 1 : 0; // Default TDS > 750ppm
+}
+
+static normalized_sensors_data_t normalize_sensors_data(sensors_data_t data){
     // Normalized data
     bool normalized_temperature, normalized_ph, normalized_tds;
     
-    // Basic Normalization
-    normalized_temperature = (temperature < 24.0f || temperature > 30.0f) ? 1 : 0; // 24ºC < Temperature > 30ºC
-    normalized_ph = (ph < 6.0f || ph > 8.0f) ? 1 : 0; // 6.0 < pH < 8.0
-    normalized_tds = (tds > 750.0f) ? 1 : 0; // TDS > 750ppm
-
-    // Advanced Normalization
-    
+    // Normalization
+    normalized_temperature = (data.temperature < 24.0f || data.temperature > 30.0f) ? 1 : 0; // 24ºC < Temperature > 30ºC
+    normalized_ph = (data.ph < 6.0f || data.ph > 8.0f) ? 1 : 0; // 6.0 < pH < 8.0
+    normalized_tds = get_normalized_tds(data);
 
 
     normalized_sensors_data_t normalized_data = {
