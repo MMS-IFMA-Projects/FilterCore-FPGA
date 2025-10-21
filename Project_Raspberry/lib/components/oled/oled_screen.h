@@ -4,15 +4,11 @@
 #include <stdint.h>
 
 typedef enum {
-    OLED_SCREEN = 0,
-    AX_SCREEN,
-    AY_SCREEN,
-    AZ_SCREEN,
-    GX_SCREEN,
-    GY_SCREEN,
-    GZ_SCREEN,
-    TEMP_SCREEN,
-    TOTAL_SCREENS
+    DEFAULT_SCREEN = 0,
+    PH_SCREEN,
+    TDS_SCREEN,
+    TEMPERATURE_SCREEN,
+    NOTIFICATIONS_SCREEN
 } oled_screen_t;
 
 #endif // OLED_SCREEN_H

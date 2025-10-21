@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#define SSD1306_CHAR_WIDTH 8
+#define SSD1306_CHAR_HEIGHT 8
+
 void ssd1306_draw_char(uint8_t *ssd, int16_t x, int16_t y, uint8_t character, uint8_t width, uint8_t height);
 
 void ssd1306_draw_string(uint8_t *ssd, int16_t x, int16_t y, const char *string, uint8_t width, uint8_t height);

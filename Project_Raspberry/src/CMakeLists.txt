@@ -1,6 +1,7 @@
 #Caminhos para as pastas includes
 set(COMPONENTS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/components)
 set(PROTOCOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/protocols)
+set(SCREENS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/screens)
 set(TASKS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/tasks)
 
 # Agrupamento de fontes por componente
@@ -28,16 +29,24 @@ set(I2C_COMPONENT_SOURCES
 #OLED
 set(OLED_COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/oled_display.c
+    ${CMAKE_CURRENT_LIST_DIR}/components/oled/oled_environment.c
+    ${CMAKE_CURRENT_LIST_DIR}/components/oled/oled_prints.c
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/ssd1306_text.c
 )
 
-# Agrupando de fontes por tarefas
-# set(TASK_SOURCES
-#     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_dig_water_level.c
-#     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_i2c_analogs.c 
-#     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_i2c_brightness.c 
-#     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_i2c_temperature_rh.c
-# )
+#Agrupando telas para o OLED
+set(SCREENS_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/screens/default_screen.c
+    ${CMAKE_CURRENT_LIST_DIR}/screens/ph_screen.c
+    ${CMAKE_CURRENT_LIST_DIR}/screens/tds_screen.c
+    ${CMAKE_CURRENT_LIST_DIR}/screens/temperature_screen.c
+    ${CMAKE_CURRENT_LIST_DIR}/screens/notifications_screen.c
+)
+
+#Agrupando de fontes por tarefas
+set(TASK_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_display.c
+)
 
 add_executable(filtercore
     main.c
@@ -46,7 +55,8 @@ add_executable(filtercore
     ${ANALOG_COMPONENT_SOURCES}
     ${DIGITAL_COMPONENT_SOURCES}
     ${OLED_COMPONENT_SOURCES}
-    # ${TASK_SOURCES}
+    ${SCREEN_SOURCES}
+    ${TASK_SOURCES}
 )
 
 # Corrige a saída para build/ em vez de build/src/
@@ -64,6 +74,8 @@ target_include_directories(filtercore PRIVATE
     ${COMPONENTS_PATH}/analog
     ${COMPONENTS_PATH}/digital
     ${COMPONENTS_PATH}/oled
+    ${COMPONENTS_PATH}/oled/fonts
+    ${SCREENS_PATH}
     ${TASKS_PATH}     
 )
 

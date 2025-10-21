@@ -2,13 +2,14 @@
 #define OLED_DISPLAY_H
 
 #include "i2c_configs.h"
+#include "ssd1306_text.h"
 #include <stdint.h>
 #include <stddef.h>
 
 // Display dimensions
 #define OLED_WIDTH  128
 #define OLED_HEIGHT 64
-#define OLED_PAGES (OLED_HEIGHT / 8)
+#define OLED_PAGES (OLED_HEIGHT / SSD1306_CHAR_HEIGHT)
 #define OLED_I2C_ADDRESS 0x3C
 #define OLED_I2C_FREQ 400000
 

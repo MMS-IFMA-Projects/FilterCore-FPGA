@@ -50,12 +50,12 @@ static inline int ssd1306_get_font(uint8_t character) {
 }
 
 void ssd1306_draw_char(uint8_t *ssd, int16_t x, int16_t y, uint8_t character, uint8_t width, uint8_t height) {
-    if (x > width - 8 || y > height - 8) return;
-    y /= 8;
+    if (x > width - SSD1306_CHAR_WIDTH || y > height - SSD1306_CHAR_HEIGHT) return;
+    y /= SSD1306_CHAR_HEIGHT; // Convert y to page number
     int idx = ssd1306_get_font(character);
     int fb_idx = y * width + x + 1; // +1 to skip the control byte
-    for (int i = 0; i < 8; i++) {
-        ssd[fb_idx++] = font[idx * 8 + i];
+    for (int i = 0; i < 8; i++) { // Each character is 8 bytes wide
+        ssd[fb_idx++] = font[idx * 8 + i]; // Copy font data to framebuffer
     }
 }
 
@@ -68,8 +68,8 @@ void ssd1306_draw_string(uint8_t *ssd, int16_t x, int16_t y, const char *string,
 }
 
 void ssd1306_draw_utf8_multiline(uint8_t *ssd, int16_t x, int16_t y, const char *utf8_string, uint8_t width, uint8_t height) {
-    const int char_width = 8;
-    const int char_height = 8;
+    const int char_width = SSD1306_CHAR_WIDTH;
+    const int char_height = SSD1306_CHAR_HEIGHT;
     const int max_x = width - char_width;
     const int max_y = height - char_height;
 
