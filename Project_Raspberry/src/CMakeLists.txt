@@ -1,11 +1,11 @@
-#Caminhos para as pastas includes
+# Paths to the includes folders
 set(COMPONENTS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/components)
 set(MISCELLANEOUS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/miscellaneous)
 set(PROTOCOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/protocols)
 set(SCREENS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/screens)
 set(TASKS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/tasks)
 
-# Agrupamento de fontes por componente
+# Grouping of sources by component
 #ANALOGIC
 set(ANALOG_COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/components/analog/ds18b20.c
@@ -35,7 +35,7 @@ set(OLED_COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/ssd1306_text.c
 )
 
-#Agrupamento de telas para o OLED
+# Screen grouping for OLED
 set(SCREENS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/screens/default_screen.c
     ${CMAKE_CURRENT_LIST_DIR}/screens/ph_screen.c
@@ -44,13 +44,13 @@ set(SCREENS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/screens/notifications_screen.c
 )
 
-#Agrupamento de fontes por tarefas
+# Grouping sources by tasks
 set(TASK_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_display.c
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_sensors.c
 )
 
-#Agrupamento de fontes diversas
+# Grouping of various sources
 set(MISCELLANEOUS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/notifications.c
 )
@@ -65,10 +65,9 @@ add_executable(filtercore
     ${SCREEN_SOURCES}
     ${MISCELLANEOUS_SOURCES}
     ${TASK_SOURCES}
-    
 )
 
-# Corrige a saída para build/ em vez de build/src/
+# Corrects the output to build/ instead of build/src/
 set_target_properties(filtercore PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 target_sources(filtercore PRIVATE
