@@ -46,6 +46,7 @@ set(SCREENS_SOURCES
 #Agrupando de fontes por tarefas
 set(TASK_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_display.c
+    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_sensors.c
 )
 
 add_executable(filtercore

@@ -83,7 +83,7 @@ static void task_display(void *params) {
 
 }
 
-void create_task_display() {
+void create_task_display(void) {
    TaskHandle_t handle;
    BaseType_t status = xTaskCreate(
        task_display,          

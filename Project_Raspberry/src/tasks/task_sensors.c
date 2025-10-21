@@ -22,6 +22,7 @@ static normalized_sensors_data_t normalize_sensors_data(sensors_data_t data){
     normalized_tds = (tds > 750.0f) ? 1 : 0; // TDS > 750ppm
 
     // Advanced Normalization
+    
 
 
     normalized_sensors_data_t normalized_data = {
@@ -72,7 +73,7 @@ static void task_sensors(void *params) {
     }
 }
 
-void create_task_sensors() {
+void create_task_sensors(void) {
     init_button_a();
 
     TaskHandle_t handle;
