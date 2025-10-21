@@ -1,5 +1,6 @@
 #Caminhos para as pastas includes
 set(COMPONENTS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/components)
+set(MISCELLANEOUS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/miscellaneous)
 set(PROTOCOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/protocols)
 set(SCREENS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/screens)
 set(TASKS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/tasks)
@@ -34,7 +35,7 @@ set(OLED_COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/ssd1306_text.c
 )
 
-#Agrupando telas para o OLED
+#Agrupamento de telas para o OLED
 set(SCREENS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/screens/default_screen.c
     ${CMAKE_CURRENT_LIST_DIR}/screens/ph_screen.c
@@ -43,10 +44,15 @@ set(SCREENS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/screens/notifications_screen.c
 )
 
-#Agrupando de fontes por tarefas
+#Agrupamento de fontes por tarefas
 set(TASK_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_display.c
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_sensors.c
+)
+
+#Agrupamento de fontes diversas
+set(MISCELLANEOUS_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/notifications.c
 )
 
 add_executable(filtercore
@@ -57,7 +63,9 @@ add_executable(filtercore
     ${DIGITAL_COMPONENT_SOURCES}
     ${OLED_COMPONENT_SOURCES}
     ${SCREEN_SOURCES}
+    ${MISCELLANEOUS_SOURCES}
     ${TASK_SOURCES}
+    
 )
 
 # Corrige a saída para build/ em vez de build/src/
@@ -77,6 +85,7 @@ target_include_directories(filtercore PRIVATE
     ${COMPONENTS_PATH}/oled
     ${COMPONENTS_PATH}/oled/fonts
     ${SCREENS_PATH}
+    ${MISCELLANEOUS_PATH}
     ${TASKS_PATH}     
 )
 
