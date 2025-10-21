@@ -4,6 +4,7 @@
 #include "ph4502c.h"
 #include "tds_meter.h"
 #include "buttons.h"
+#include "notifications.h"
 
 #define SENSORS_INTERVAL_MS 125
 
@@ -58,23 +59,14 @@ static void task_sensors(void *params) {
 
         normalized_sensors_data_t normalized_data = normalize_sensors_data(data);
 
-        if(xQueueSend(queue_sensors_data, &data, pdMS_TO_TICKS(100)) != pdPASS){
-            notification_t notification = {
-                .type = ERROR,
-                .message = "Failed to insert O data"
-            };
+        // Manual activation notification
+        if(button_state) send_notification(INFO, "Manual execution started");
 
-            xQueueSend(queue_notifications, &notification, pdMS_TO_TICKS(50));
-        }
+        // Sending sensor data to the queue
+        if(xQueueSend(queue_sensors_data, &data, pdMS_TO_TICKS(100)) != pdPASS) send_notification(ERROR, "Failed to insert PI data");
 
-        if(xQueueSend(queue_normalized_sensors_data, &normalized_data, pdMS_TO_TICKS(100)) != pdPASS){
-            notification_t notification = {
-                .type = ERROR,
-                .message = "Failed to insert N data"
-            };
-            
-            xQueueSend(queue_notifications, &notification, pdMS_TO_TICKS(50));
-        }
+        // Sending normalized data to the queue
+        if(xQueueSend(queue_normalized_sensors_data, &normalized_data, pdMS_TO_TICKS(100)) != pdPASS) send_notification(ERROR, "Failed to insert N FPGA data");
 
         vTaskDelay(pdMS_TO_TICKS(SENSORS_INTERVAL_MS));
     }
