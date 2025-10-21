@@ -7,6 +7,33 @@
 
 #define SENSORS_INTERVAL_MS 125
 
+static normalized_sensors_data_t normalize_sensors_data(sensors_data_t data){
+    // Continuous data
+    celsius_t temperature = data.temperature;
+    ph_t ph = data.ph;
+    ppm_t tds = data.tds;
+
+    // Normalized data
+    bool normalized_temperature, normalized_ph, normalized_tds;
+    
+    // Basic Normalization
+    normalized_temperature = (temperature < 24.0f || temperature > 30.0f) ? 1 : 0; // 24ºC < Temperature > 30ºC
+    normalized_ph = (ph < 6.0f || ph > 8.0f) ? 1 : 0; // 6.0 < pH < 8.0
+    normalized_tds = (tds > 750.0f) ? 1 : 0; // TDS > 750ppm
+
+    // Advanced Normalization
+
+
+    normalized_sensors_data_t normalized_data = {
+        .temperature = normalized_temperature,
+        .ph = normalized_ph,
+        .tds = normalized_tds,
+        .button_state = data.button_state
+    };
+
+    return normalized_data;
+}
+
 static void task_sensors(void *params) {
     printf("[Started] | [Task 2] | [Sensors Reading]\n");
 
@@ -23,14 +50,23 @@ static void task_sensors(void *params) {
             .button_state = button_state
         };
 
+        normalized_sensors_data_t normalized_data = normalize_sensors_data(data);
+
         if(xQueueSend(queue_sensors_data, &data, pdMS_TO_TICKS(100)) != pdPASS){
             notification_t notification = {
                 .type = ERROR,
-                .message = "Failed to insert data"
+                .message = "Failed to insert O data"
             };
 
             xQueueSend(queue_notifications, &notification, pdMS_TO_TICKS(50));
-        } 
+        }
+
+        if(xQueueSend(queue_normalized_sensors_data, &normalized_data, pdMS_TO_TICKS(100)) != pdPASS){
+            notification_t notification = {
+                .type = ERROR,
+                .message = "Failed to insert N data"
+            };
+        }
 
         vTaskDelay(pdMS_TO_TICKS(SENSORS_INTERVAL_MS));
     }
