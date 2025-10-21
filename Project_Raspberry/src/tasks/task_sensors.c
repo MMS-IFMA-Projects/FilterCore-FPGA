@@ -11,10 +11,10 @@ static bool get_normalized_tds(sensors_data_t data){
     ppm_t max_tds = MAX_DEFAULT_TDS;
 
     // Linear functions for PH range
-    if(data.temperature >= 24.0f && data.temperature <= 30.0f){
-        if(data.ph >= 6.0f && data.ph < 6.5f) max_tds = (-16.67f * data.temperature) + 1300.0f;
-        if(data.ph >= 6.5f && data.ph < 7.5f) max_tds = (-33.33f * data.temperature) + 1575.0f;
-        if(data.ph >= 7.5f && data.ph <= 8.0f) max_tds = (-16.67f * data.temperature) + 950.0f;
+    if(data.temperature >= MIN_TEMPERATURE_CELSIUS && data.temperature <= MAX_TEMPERATURE_CELSIUS){
+        if(data.ph >= MIN_PH && data.ph < (MIN_PH + PH_FACTOR)) max_tds = (-16.67f * data.temperature) + 1300.0f;
+        if(data.ph >= (MIN_PH + PH_FACTOR) && data.ph < (MIN_PH + (PH_FACTOR * 3))) max_tds = (-33.33f * data.temperature) + 1575.0f;
+        if(data.ph >= (MIN_PH + (PH_FACTOR * 3)) && data.ph <= MAX_PH) max_tds = (-16.67f * data.temperature) + 950.0f;
     }
 
     return (data.tds > max_tds) ? 1 : 0; // Default TDS > 750ppm
@@ -25,8 +25,8 @@ static normalized_sensors_data_t normalize_sensors_data(sensors_data_t data){
     bool normalized_temperature, normalized_ph, normalized_tds;
     
     // Normalization
-    normalized_temperature = (data.temperature < 24.0f || data.temperature > 30.0f) ? 1 : 0; // 24ºC < Temperature > 30ºC
-    normalized_ph = (data.ph < 6.0f || data.ph > 8.0f) ? 1 : 0; // 6.0 < pH < 8.0
+    normalized_temperature = (data.temperature < MIN_TEMPERATURE_CELSIUS || data.temperature > MAX_TEMPERATURE_CELSIUS) ? 1 : 0; // 24ºC < Temperature > 30ºC
+    normalized_ph = (data.ph < MIN_PH || data.ph > MAX_PH) ? 1 : 0; // 6.0 < pH < 8.0
     normalized_tds = get_normalized_tds(data);
 
 
@@ -72,6 +72,8 @@ static void task_sensors(void *params) {
                 .type = ERROR,
                 .message = "Failed to insert N data"
             };
+            
+            xQueueSend(queue_notifications, &notification, pdMS_TO_TICKS(50));
         }
 
         vTaskDelay(pdMS_TO_TICKS(SENSORS_INTERVAL_MS));
