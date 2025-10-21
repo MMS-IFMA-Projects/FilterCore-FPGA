@@ -8,6 +8,33 @@
 
 #define SENSORS_INTERVAL_MS 125
 
+static bool get_normalized_temperature(celsius_t temperature){
+    if(temperature < MIN_TEMPERATURE_CELSIUS){
+        send_notification(WARNING, "Low temperature!"); 
+        return 1;
+    }else if(temperature > MAX_TEMPERATURE_CELSIUS){
+        send_notification(WARNING, "High temperature!"); 
+        return 1;
+    }
+
+    send_notification(INFO, "Ideal Temperature");
+    return 0;
+}
+
+static bool get_normalized_ph(ph_t ph){
+    if(ph < MIN_PH){
+        send_notification(WARNING, "Acidic pH!"); 
+        return 1;
+    }else if(ph > MAX_PH){
+        send_notification(WARNING, "Alkaline pH!"); 
+        return 1;
+    }
+    
+    send_notification(INFO, "Ideal pH");
+    return 0;
+}
+
+
 static bool get_normalized_tds(sensors_data_t data){
     ppm_t max_tds = MAX_DEFAULT_TDS;
 
@@ -18,7 +45,13 @@ static bool get_normalized_tds(sensors_data_t data){
         if(data.ph >= (MIN_PH + (PH_FACTOR * 3)) && data.ph <= MAX_PH) max_tds = (-16.67f * data.temperature) + 950.0f;
     }
 
-    return (data.tds > max_tds) ? 1 : 0; // Default TDS > 750ppm
+    if(data.tds > max_tds){
+        send_notification(WARNING, "High TDS!"); 
+        return 1;
+    }
+
+    send_notification(INFO, "Ideal TDS");
+    return 0; 
 }
 
 static normalized_sensors_data_t normalize_sensors_data(sensors_data_t data){
@@ -26,8 +59,8 @@ static normalized_sensors_data_t normalize_sensors_data(sensors_data_t data){
     bool normalized_temperature, normalized_ph, normalized_tds;
     
     // Normalization
-    normalized_temperature = (data.temperature < MIN_TEMPERATURE_CELSIUS || data.temperature > MAX_TEMPERATURE_CELSIUS) ? 1 : 0; // 24ºC < Temperature > 30ºC
-    normalized_ph = (data.ph < MIN_PH || data.ph > MAX_PH) ? 1 : 0; // 6.0 < pH < 8.0
+    normalized_temperature = get_normalized_temperature(data.temperature);
+    normalized_ph = get_normalized_ph(data.ph);
     normalized_tds = get_normalized_tds(data);
 
 
