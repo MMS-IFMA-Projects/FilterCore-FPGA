@@ -83,12 +83,12 @@ static void task_display(void *params) {
 
 }
 
-void create_task_display() {
+void create_task_display(void) {
    TaskHandle_t handle;
    BaseType_t status = xTaskCreate(
        task_display,          
        "Task Display",       
-       configMINIMAL_STACK_SIZE * 2, 
+       configMINIMAL_STACK_SIZE * 4, 
        NULL,                 
        tskIDLE_PRIORITY + 1, 
        &handle               

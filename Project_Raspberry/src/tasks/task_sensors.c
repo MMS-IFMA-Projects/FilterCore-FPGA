@@ -4,24 +4,64 @@
 #include "ph4502c.h"
 #include "tds_meter.h"
 #include "buttons.h"
+#include "notifications.h"
 
 #define SENSORS_INTERVAL_MS 125
 
-static normalized_sensors_data_t normalize_sensors_data(sensors_data_t data){
-    // Continuous data
-    celsius_t temperature = data.temperature;
-    ph_t ph = data.ph;
-    ppm_t tds = data.tds;
+static bool get_normalized_temperature(celsius_t temperature){
+    if(temperature < MIN_TEMPERATURE_CELSIUS){
+        send_notification(WARNING, "Low temperature!"); 
+        return 1;
+    }else if(temperature > MAX_TEMPERATURE_CELSIUS){
+        send_notification(WARNING, "High temperature!"); 
+        return 1;
+    }
 
+    send_notification(INFO, "Ideal Temperature");
+    return 0;
+}
+
+static bool get_normalized_ph(ph_t ph){
+    if(ph < MIN_PH){
+        send_notification(WARNING, "Acidic pH!"); 
+        return 1;
+    }else if(ph > MAX_PH){
+        send_notification(WARNING, "Alkaline pH!"); 
+        return 1;
+    }
+    
+    send_notification(INFO, "Ideal pH");
+    return 0;
+}
+
+
+static bool get_normalized_tds(sensors_data_t data){
+    ppm_t max_tds = MAX_DEFAULT_TDS;
+
+    // Linear functions for PH range
+    if(data.temperature >= MIN_TEMPERATURE_CELSIUS && data.temperature <= MAX_TEMPERATURE_CELSIUS){
+        if(data.ph >= MIN_PH && data.ph < (MIN_PH + PH_FACTOR)) max_tds = (-16.67f * data.temperature) + 1300.0f;
+        if(data.ph >= (MIN_PH + PH_FACTOR) && data.ph < (MIN_PH + (PH_FACTOR * 3))) max_tds = (-33.33f * data.temperature) + 1575.0f;
+        if(data.ph >= (MIN_PH + (PH_FACTOR * 3)) && data.ph <= MAX_PH) max_tds = (-16.67f * data.temperature) + 950.0f;
+    }
+
+    if(data.tds > max_tds){
+        send_notification(WARNING, "High TDS!"); 
+        return 1;
+    }
+
+    send_notification(INFO, "Ideal TDS");
+    return 0; 
+}
+
+static normalized_sensors_data_t normalize_sensors_data(sensors_data_t data){
     // Normalized data
     bool normalized_temperature, normalized_ph, normalized_tds;
     
-    // Basic Normalization
-    normalized_temperature = (temperature < 24.0f || temperature > 30.0f) ? 1 : 0; // 24ºC < Temperature > 30ºC
-    normalized_ph = (ph < 6.0f || ph > 8.0f) ? 1 : 0; // 6.0 < pH < 8.0
-    normalized_tds = (tds > 750.0f) ? 1 : 0; // TDS > 750ppm
-
-    // Advanced Normalization
+    // Normalization
+    normalized_temperature = get_normalized_temperature(data.temperature);
+    normalized_ph = get_normalized_ph(data.ph);
+    normalized_tds = get_normalized_tds(data);
 
 
     normalized_sensors_data_t normalized_data = {
@@ -52,27 +92,20 @@ static void task_sensors(void *params) {
 
         normalized_sensors_data_t normalized_data = normalize_sensors_data(data);
 
-        if(xQueueSend(queue_sensors_data, &data, pdMS_TO_TICKS(100)) != pdPASS){
-            notification_t notification = {
-                .type = ERROR,
-                .message = "Failed to insert O data"
-            };
+        // Manual activation notification
+        if(button_state) send_notification(INFO, "Manual execution started");
 
-            xQueueSend(queue_notifications, &notification, pdMS_TO_TICKS(50));
-        }
+        // Sending sensor data to the queue
+        if(xQueueSend(queue_sensors_data, &data, pdMS_TO_TICKS(100)) != pdPASS) send_notification(ERROR, "Failed to insert PI data");
 
-        if(xQueueSend(queue_normalized_sensors_data, &normalized_data, pdMS_TO_TICKS(100)) != pdPASS){
-            notification_t notification = {
-                .type = ERROR,
-                .message = "Failed to insert N data"
-            };
-        }
+        // Sending normalized data to the queue
+        if(xQueueSend(queue_normalized_sensors_data, &normalized_data, pdMS_TO_TICKS(100)) != pdPASS) send_notification(ERROR, "Failed to insert N FPGA data");
 
         vTaskDelay(pdMS_TO_TICKS(SENSORS_INTERVAL_MS));
     }
 }
 
-void create_task_sensors() {
+void create_task_sensors(void) {
     init_button_a();
 
     TaskHandle_t handle;

@@ -57,7 +57,7 @@ bool oled_init(ssd1306_t* oled) {
 
 void oled_clear(ssd1306_t* oled) {
     if(!oled || !oled->ram_buffer) return;
-    memset(oled->ram_buffer[1], 0x00, oled->buffer_size - 1);
+    memset(&oled->ram_buffer[1], 0x00, oled->buffer_size - 1);
 }
 
 void oled_render(ssd1306_t* oled) {

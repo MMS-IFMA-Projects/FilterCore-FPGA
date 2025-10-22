@@ -1,6 +1,10 @@
 #include "events.h"
 #include "i2c_configs.h"
 #include "oled_environment.h"
+#include "task_sensors.h"
+#include "task_display.h"
+#include "task_pagination.h"
+#include "task_handshake.h"
 
 QueueHandle_t queue_sensors_data = NULL;
 QueueHandle_t queue_normalized_sensors_data = NULL;
@@ -44,6 +48,21 @@ int main(){
         printf("Error creating notifications queue!\n");
         while(true);
     }
+
+    // Task Sensors
+    create_task_sensors();
+
+    // Task Display
+    create_task_display();
+
+    // Task Pagination
+    create_task_pagination();
+    
+    // Task Handshake
+    create_task_handshake();
+
+    // FreeRTOS scheduler
+    vTaskStartScheduler();
 
     while(true);
 }

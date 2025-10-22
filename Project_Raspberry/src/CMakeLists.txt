@@ -1,10 +1,11 @@
-#Caminhos para as pastas includes
+# Paths to the includes folders
 set(COMPONENTS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/components)
+set(MISCELLANEOUS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/miscellaneous)
 set(PROTOCOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/protocols)
 set(SCREENS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/screens)
 set(TASKS_PATH ${CMAKE_CURRENT_LIST_DIR}/../lib/tasks)
 
-# Agrupamento de fontes por componente
+# Grouping of sources by component
 #ANALOGIC
 set(ANALOG_COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/components/analog/ds18b20.c
@@ -34,7 +35,7 @@ set(OLED_COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/components/oled/ssd1306_text.c
 )
 
-#Agrupando telas para o OLED
+# Screen grouping for OLED
 set(SCREENS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/screens/default_screen.c
     ${CMAKE_CURRENT_LIST_DIR}/screens/ph_screen.c
@@ -43,9 +44,18 @@ set(SCREENS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/screens/notifications_screen.c
 )
 
-#Agrupando de fontes por tarefas
+# Grouping sources by tasks
 set(TASK_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_display.c
+    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_handshake.c
+    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_pagination.c
+    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_sensors.c
+)
+
+# Grouping of various sources
+set(MISCELLANEOUS_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/notifications.c
+    ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/handshake.c
 )
 
 add_executable(filtercore
@@ -56,10 +66,11 @@ add_executable(filtercore
     ${DIGITAL_COMPONENT_SOURCES}
     ${OLED_COMPONENT_SOURCES}
     ${SCREEN_SOURCES}
+    ${MISCELLANEOUS_SOURCES}
     ${TASK_SOURCES}
 )
 
-# Corrige a saída para build/ em vez de build/src/
+# Corrects the output to build/ instead of build/src/
 set_target_properties(filtercore PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 target_sources(filtercore PRIVATE
@@ -76,6 +87,7 @@ target_include_directories(filtercore PRIVATE
     ${COMPONENTS_PATH}/oled
     ${COMPONENTS_PATH}/oled/fonts
     ${SCREENS_PATH}
+    ${MISCELLANEOUS_PATH}
     ${TASKS_PATH}     
 )
 
@@ -84,10 +96,6 @@ target_link_libraries(filtercore
     pico_time 
     FreeRTOS-Kernel
     hardware_i2c
-    hardware_adc
-    hardware_dma
-    hardware_pwm
-    hardware_clocks
     hardware_gpio
 )
 

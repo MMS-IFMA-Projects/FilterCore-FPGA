@@ -27,7 +27,7 @@ ph_t ph4502c_read_ph(void) {
 
     // Collects multiple samples from the ADC to reduce noise
     for (int i = 0; i < NUM_SAMPLES; i++) {
-        samples[i] = ads1115_read_channel(PH_ADC_CHANNEL);
+        samples[i] = ads1115_read_adc(PH_ADC_CHANNEL);
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 

@@ -26,7 +26,7 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK
 include(pico_sdk_import.cmake)
 
-# Define projeto
+# Define project
 project(filtercore C CXX ASM)
 
 
@@ -40,13 +40,13 @@ pico_sdk_init()
 #pico_enable_stdio_usb(filtercore 1)
 
 
-# Caminho para o FreeRTOS
+# Path to FreeRTOS
 set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/extern/FreeRTOS-Kernel)
 
-# Importa o FreeRTOS
+# Import FreeRTOS
 include(${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake)
 
-# Adiciona o diretório com o código modular
+# Adds the directory with the modular code
 add_subdirectory(src)
 
 # Add any user requested libraries

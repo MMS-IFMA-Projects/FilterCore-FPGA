@@ -46,6 +46,7 @@
         "oled_environment.h": "c",
         "oled_prints.h": "c",
         "default_screen.h": "c",
-        "ds18b20.h": "c"
+        "ds18b20.h": "c",
+        "ads1115.h": "c"
     }
 }

@@ -10,6 +10,13 @@
 
 #define MAX_NOTIFICATIONS 5
 #define MAX_SENSORS_DATA 5
+#define MAX_TEMPERATURE_CELSIUS 30.0f
+#define MIN_TEMPERATURE_CELSIUS 24.0f
+#define MAX_PH 8.0f
+#define MIN_PH 6.0f
+#define PH_FACTOR 0.5f
+#define MAX_DEFAULT_TDS 750.0f
+
 
 typedef enum {
     INFO,
@@ -33,7 +40,7 @@ typedef struct{
 
 typedef struct{
     notification_type_t type;
-    char message[22];
+    char *message;
 } notification_t;
 
 extern TaskHandle_t handle_display;
