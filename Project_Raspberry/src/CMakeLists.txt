@@ -48,11 +48,14 @@ set(SCREENS_SOURCES
 set(TASK_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_display.c
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_sensors.c
+    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_pagination.c
+    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_handshake.c
 )
 
 # Grouping of various sources
 set(MISCELLANEOUS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/notifications.c
+    ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/handshake.c
 )
 
 add_executable(filtercore
