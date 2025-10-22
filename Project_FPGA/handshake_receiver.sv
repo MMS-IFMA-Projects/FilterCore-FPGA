@@ -3,7 +3,7 @@
  * @brief Módulo receptor com protocolo de handshake assíncrono.
  */
 module handshake_receiver #(
-    parameter int DATA_WIDTH = 8
+    parameter int DATA_WIDTH = 4
 ) (
     input wire clk_fpga, input wire reset,
     input wire [DATA_WIDTH-1:0] i_dados, input wire i_req,
