@@ -47,9 +47,9 @@ set(SCREENS_SOURCES
 # Grouping sources by tasks
 set(TASK_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_display.c
-    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_sensors.c
-    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_pagination.c
     ${CMAKE_CURRENT_LIST_DIR}/tasks/task_handshake.c
+    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_pagination.c
+    ${CMAKE_CURRENT_LIST_DIR}/tasks/task_sensors.c
 )
 
 # Grouping of various sources
@@ -96,10 +96,6 @@ target_link_libraries(filtercore
     pico_time 
     FreeRTOS-Kernel
     hardware_i2c
-    hardware_adc
-    hardware_dma
-    hardware_pwm
-    hardware_clocks
     hardware_gpio
 )
 
