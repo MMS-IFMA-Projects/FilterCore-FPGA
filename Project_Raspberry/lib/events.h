@@ -40,7 +40,7 @@ typedef struct{
 
 typedef struct{
     notification_type_t type;
-    char message[22];
+    char *message;
 } notification_t;
 
 extern TaskHandle_t handle_display;

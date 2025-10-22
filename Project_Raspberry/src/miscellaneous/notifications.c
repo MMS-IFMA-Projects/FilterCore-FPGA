@@ -1,7 +1,6 @@
 #include "notifications.h"
-#include "events.h"
 
-void send_notification(uint8_t type, char *message){
+void send_notification(notification_type_t type, char *message){
     notification_t notification = {
         .type = type,
         .message = message

@@ -1,4 +1,5 @@
 #include "handshake.h"
+#include "notifications.h"
 
 #define DATA_TEMPERATURE_PIN 18
 #define DATA_PH_PIN 19

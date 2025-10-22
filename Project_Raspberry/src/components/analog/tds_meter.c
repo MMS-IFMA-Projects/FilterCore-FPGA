@@ -26,7 +26,7 @@ ppm_t tds_meter_read_ppm(celsius_t current_temperature) {
 
     // Collect multiple samples from the ADC to reduce noise
     for (int i = 0; i < NUM_SAMPLES; i++) {
-        samples[i] = ads1115_read_channel(TDS_ADC_CHANNEL);
+        samples[i] = ads1115_read_adc(TDS_ADC_CHANNEL);
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 
