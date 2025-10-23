@@ -41,7 +41,7 @@ bool handshake_acknowledge(void){
     }
 
     if(timeout_ms >= HANDSHAKE_TIMEOUT_MS){
-        send_notification(ERROR, "Handshake timeout, retrying...");
+        send_notification(ERROR, "HS Retry...");
         gpio_put(ACK_PIN, 0);
         return false;
     }

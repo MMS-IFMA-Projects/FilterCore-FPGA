@@ -56,6 +56,7 @@ set(TASK_SOURCES
 set(MISCELLANEOUS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/notifications.c
     ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/handshake.c
+    ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/sensor_analyzer.c
 )
 
 add_executable(filtercore

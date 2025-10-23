@@ -13,6 +13,9 @@ QueueHandle_t queue_notifications = NULL;
 int main(){
     stdio_init_all();
 
+    //Serial monitor debugging
+    while (!stdio_usb_connected()) sleep_ms(200);
+
     i2c0_configs(I2C_BAUDRATE_DEFAULT);
 
     // Initializes the OLED display
@@ -49,11 +52,11 @@ int main(){
         while(true);
     }
 
-    // Task Sensors
-    create_task_sensors();
-
     // Task Display
     create_task_display();
+
+    // Task Sensors
+    create_task_sensors();
 
     // Task Pagination
     create_task_pagination();

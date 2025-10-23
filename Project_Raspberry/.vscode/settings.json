@@ -49,6 +49,13 @@
         "ds18b20.h": "c",
         "ads1115.h": "c",
         "notifications_screen.h": "c",
-        "ph_screen.h": "c"
+        "ph_screen.h": "c",
+        "handshake.h": "c",
+        "ssd1306_symbols_large.h": "c",
+        "string.h": "c",
+        "tds_screen.h": "c",
+        "temperature_screen.h": "c",
+        "queue.h": "c",
+        "sensor_configs.h": "c"
     }
 }
