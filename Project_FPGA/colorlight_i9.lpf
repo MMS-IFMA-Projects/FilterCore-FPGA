@@ -1,0 +1,31 @@
+# Arquivo de Restrições Físicas (.lpf) para o Projeto Filter Core
+# Placa: Colorlight (conector P4)
+# FPGA: Lattice ECP5 LFE5U-45
+
+# --- Clock Principal do FPGA (Oscilador de 25MHz da placa) ---
+LOCATE COMP "clk_fpga" SITE "P3";
+IOBUF PORT "clk_fpga" IO_TYPE=LVCMOS33;
+FREQUENCY PORT "clk_fpga" 25.0 MHz;
+
+# --- Interface de Comunicação com a BitDogLab (6 pinos) ---
+# Barramento de dados de 4 bits de status (Pico -> FPGA)
+LOCATE COMP "i_dados[0]" SITE "F2"; IOBUF PORT "i_dados[0]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+LOCATE COMP "i_dados[1]" SITE "E4"; IOBUF PORT "i_dados[1]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+LOCATE COMP "i_dados[2]" SITE "F1"; IOBUF PORT "i_dados[2]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+LOCATE COMP "i_dados[3]" SITE "F3"; IOBUF PORT "i_dados[3]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+
+# Sinais de Handshake
+LOCATE COMP "i_req" SITE "G3"; IOBUF PORT "i_req" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+LOCATE COMP "o_ack" SITE "H3"; IOBUF PORT "o_ack" IO_TYPE=LVCMOS33 DRIVE=8;
+
+# --- Sensores de Nível / Boias (2 pinos, FPGA <- Sensor) ---
+LOCATE COMP "i_boia_cheia" SITE "H4"; IOBUF PORT "i_boia_cheia" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+LOCATE COMP "i_boia_vazia" SITE "H5"; IOBUF PORT "i_boia_vazia" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+
+# --- Saídas PWM para os Atuadores (2 Bombas) ---
+LOCATE COMP "o_pwm_bomba_a" SITE "J4"; IOBUF PORT "o_pwm_bomba_a" IO_TYPE=LVCMOS33 DRIVE=8;
+LOCATE COMP "o_pwm_bomba_b" SITE "J5"; IOBUF PORT "o_pwm_bomba_b" IO_TYPE=LVCMOS33 DRIVE=8;
+
+# --- Reset (Opcional - Pode ser conectado a um botão ou gerenciado internamente) ---
+# Se você tiver um pino de reset externo, descomente e ajuste a linha abaixo:
+# LOCATE COMP "reset" SITE "??"; IOBUF PORT "reset" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
