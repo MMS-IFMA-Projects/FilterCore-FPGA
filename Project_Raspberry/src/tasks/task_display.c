@@ -9,6 +9,7 @@
 #include "tds_screen.h"
 #include "temperature_screen.h"
 #include "notifications_screen.h"
+#include "notifications.h"
 
 #define DISPLAY_INTERVAL_MS 250
 
@@ -26,8 +27,7 @@ static void task_display(void *params) {
 
     notification_t latest_notifications[MAX_NOTIFICATIONS];
     for(uint8_t i = 0; i < MAX_NOTIFICATIONS; i++){
-        latest_notifications[i].type = INFO;
-        snprintf(latest_notifications[i].message, sizeof(latest_notifications[i].message), "No notifications.");
+        send_notification(INFO, "No data");
     }
 
     // Screen selection loop
@@ -90,7 +90,7 @@ void create_task_display(void) {
        "Task Display",       
        configMINIMAL_STACK_SIZE * 4, 
        NULL,                 
-       tskIDLE_PRIORITY + 1, 
+       tskIDLE_PRIORITY + 2, 
        &handle               
    );
 

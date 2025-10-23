@@ -39,7 +39,7 @@ void create_task_pagination(void){
         "Task Pagination",       
         configMINIMAL_STACK_SIZE * 2, 
         NULL,                 
-        tskIDLE_PRIORITY + 2, 
+        tskIDLE_PRIORITY + 3, 
         &handle               
     );
 

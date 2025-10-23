@@ -2,6 +2,8 @@
 #include "handshake.h"
 #include "notifications.h"
 
+#define HANDSHAKE_INTERVAL_MS 250
+
 static void task_handshake(void *params){
     printf("[Started] | [Task 4] | [Handshake]\n");
 
@@ -30,8 +32,10 @@ static void task_handshake(void *params){
                 handshake_await_ack_lower();
             }
 
-            if(!success) send_notification(ERROR, "Handshake failed!");
+            if(!success) send_notification(ERROR, "HS Failed!");
         }
+
+        vTaskDelay(pdMS_TO_TICKS(HANDSHAKE_INTERVAL_MS));
     }
 }
 

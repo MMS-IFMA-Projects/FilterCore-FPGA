@@ -56,6 +56,7 @@ set(TASK_SOURCES
 set(MISCELLANEOUS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/notifications.c
     ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/handshake.c
+    ${CMAKE_CURRENT_LIST_DIR}/miscellaneous/sensor_analyzer.c
 )
 
 add_executable(filtercore
@@ -65,7 +66,7 @@ add_executable(filtercore
     ${ANALOG_COMPONENT_SOURCES}
     ${DIGITAL_COMPONENT_SOURCES}
     ${OLED_COMPONENT_SOURCES}
-    ${SCREEN_SOURCES}
+    ${SCREENS_SOURCES}
     ${MISCELLANEOUS_SOURCES}
     ${TASK_SOURCES}
 )
