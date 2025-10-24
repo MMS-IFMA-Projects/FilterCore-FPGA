@@ -6,7 +6,7 @@ module handshake_receiver #(
     parameter int DATA_WIDTH = 4
 ) (
     input  wire clk,
-    input  wire rst_n, // Active-low reset
+    input  wire reset, // Active-high reset
     input  wire [DATA_WIDTH-1:0] data_in,
     input  wire req_in,
     output logic ack_out,
@@ -15,8 +15,8 @@ module handshake_receiver #(
     output logic invalid_data_pulse
 );
     logic req_sync1, req_sync2;
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) {req_sync1, req_sync2} <= 2'b0;
+    always_ff @(posedge clk or posedge reset) begin
+        if (reset) {req_sync1, req_sync2} <= 2'b0;
         else        {req_sync1, req_sync2} <= {req_in, req_sync1};
     end
 
@@ -38,8 +38,8 @@ module handshake_receiver #(
         endcase
     end
 
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
+    always_ff @(posedge clk or posedge reset) begin
+        if (reset) begin
             current_state      <= IDLE;
             ack_out            <= 1'b0;
             data_out           <= '0;
