@@ -2,6 +2,8 @@
  * @file designer.sv
  * @brief Módulo Top-Level que implementa a lógica de controle de filtragem final.
  */
+
+ 
 module designer (
     // Clock e Reset
     input wire clk_fpga, input wire reset,
