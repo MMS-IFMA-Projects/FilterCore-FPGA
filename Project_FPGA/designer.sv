@@ -2,6 +2,8 @@
  * @file designer.sv
  * @brief Top-level module that implements the filtration control logic.
  */
+
+ 
 module designer (
     // Clock and Reset
     input wire clk,
