@@ -1,109 +1,91 @@
 /**
  * @file designer.sv
- * @brief Top-level module that implements the filtration control logic.
+ * @brief Top-level module that instantiates and connects all sub-modules.
  */
-
- 
 module designer (
     // Clock and Reset
     input wire clk,
-    input wire rst_n, // Active-low reset
+    input wire reset, // Active-high reset
 
     // Interface with Pico
-    input wire [3:0] pico_data_in,
-    input wire pico_req_in,
-    output logic pico_ack_out,
+    input wire [3:0] data_in, 
+    input wire req_in, 
+    output logic ack_out,
 
     // Float Sensor Interface
-    input wire float_full_in,
-    input wire float_empty_in,
+    input wire level_sensor_in, // '1' = EMPTY, '0' = WET
 
     // Pump PWM Outputs
-    output logic pump_a_pwm_out,
-    output logic pump_b_pwm_out,
-    output logic comm_error_led_out // Optional: for the invalid data pulse
+    output logic pwm_pump_a_out,
+    output logic pwm_pump_b_out
 );
-    typedef enum logic [1:0] {IDLE, FILLING, RETURNING, DRAINING} state_t;
 
-    // Signals from the handshake_receiver
-    logic [3:0] received_data;
-    logic       new_data_received;
-    logic       invalid_data_received;
+    // --- Wires to connect modules ---
+    logic [3:0] valid_data_from_comm;
+    logic       new_data_pulse;
+    logic       invalid_data_pulse;
+    logic       level_is_empty; // From debouncer
+    logic       level_is_full;  // Inverted from debouncer
+    logic [7:0] w_pwm_duty_a;
+    logic [7:0] w_pwm_duty_b;
+    logic [3:0] strategic_status_reg;
 
-    // Instantiate the communication module
+    // --- 1. Handshake Receiver ---
+    // Manages REQ/ACK, validates data, and provides a pulse when new data arrives.
     handshake_receiver #( .DATA_WIDTH(4) ) comm_inst (
         .clk(clk), 
-        .rst_n(rst_n),
-        .data_in(pico_data_in), 
-        .req_in(pico_req_in), 
-        .ack_out(pico_ack_out),
-        .data_out(received_data), 
-        .new_data_pulse(new_data_received),
-        .invalid_data_pulse(invalid_data_received)
+        .reset(reset),
+        .data_in(data_in), 
+        .req_in(req_in), 
+        .ack_out(ack_out),
+        .data_out(valid_data_from_comm), 
+        .new_data_pulse(new_data_pulse),
+        .invalid_data_pulse(invalid_data_pulse)
     );
 
-    logic [3:0] strategic_status_reg = 4'b0;
-    logic float_full_sync, float_empty_sync;
-    state_t current_state, next_state;
-
-    // Synchronize asynchronous float sensor inputs
-    always_ff @(posedge clk) begin
-        float_full_sync  <= float_full_in;
-        float_empty_sync <= float_empty_in;
-    end
-
-    always_comb begin
-        next_state = current_state;
-        // Main transition logic based on received status OR float sensors
-        case (current_state)
-            IDLE:
-                // If any status bit is '1' (anomaly or button), start the cycle
-                if (|strategic_status_reg) next_state = FILLING;
-            FILLING:
-                if (float_full_sync) next_state = RETURNING;
-            RETURNING:
-                // If water quality returns to normal (all status bits = 0), stop.
-                if (&(~strategic_status_reg)) next_state = DRAINING;
-                // Otherwise, if the filter empties, continue the cycle
-                else if (float_empty_sync) next_state = FILLING;
-            DRAINING:
-                if (float_empty_sync) next_state = IDLE;
-        endcase
-    end
-
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            current_state <= IDLE;
+    // --- 2. Data Latch ---
+    // Uses the pulse from the handshake to latch the validated input data.
+    always_ff @(posedge clk or posedge reset) begin
+        if (reset) begin
             strategic_status_reg <= 4'b0;
-        end else begin
-            current_state <= next_state;
+        end else if (new_data_pulse) begin
+            strategic_status_reg <= valid_data_from_comm;
         end
     end
+
+    // --- 3. Sensor Debouncer (or simple synchronizer) ---
+    // Cleans the mechanical sensor signal. '1' means stable and empty.
+    // For now, we use a simple synchronizer. A full debouncer module is recommended.
+    always_ff @(posedge clk) level_is_empty <= level_sensor_in;
+    assign level_is_full = ~level_is_empty;
+
+    // --- 4. Filter Control FSM ---
+    // The main brain of the system.
+    // (This logic would be moved to a separate 'filter_fsm.sv' module)
+    filter_fsm fsm_inst (
+        .clk(clk),
+        .reset(reset),
+        .status_data(strategic_status_reg),
+        .is_full(level_is_full),
+        .is_empty(level_is_empty),
+        .pump_a_duty_cycle(w_pwm_duty_a),
+        .pump_b_duty_cycle(w_pwm_duty_b)
+    );
+
+    // --- 5. PWM Generators ---
+    // Convert the duty cycle values from the FSM into PWM signals.
+    pwm_generator pump_a_pwm_gen (
+        .clk(clk), .reset(reset), 
+        .duty_cycle_val(w_pwm_duty_a), .pwm_signal(pwm_pump_a_out)
+    );
     
-    // Data capture logic
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            strategic_status_reg <= 4'b0;
-        end else if (new_data_received) begin
-            strategic_status_reg <= received_data;
-        end
-    end
-
-    assign comm_error_led_out = invalid_data_received;
-
-    logic [7:0] pump_a_duty_cycle, pump_b_duty_cycle;
-    localparam PWM_HIGH_DUTY = 8'd230; // 90%
-
-    always_comb begin
-        pump_a_duty_cycle = 8'h00; pump_b_duty_cycle = 8'h00; // Default off
-        case (current_state)
-            FILLING:   pump_a_duty_cycle = PWM_HIGH_DUTY;
-            RETURNING: pump_b_duty_cycle = PWM_HIGH_DUTY;
-            DRAINING:  pump_b_duty_cycle = PWM_HIGH_DUTY; // Continues draining to stop
-        endcase
-    end
-
-    pwm_generator pump_a_pwm_gen (.clk(clk), .rst_n(rst_n), .duty_cycle_val(pump_a_duty_cycle), .pwm_signal(pump_a_pwm_out));
-    pwm_generator pump_b_pwm_gen (.clk(clk), .rst_n(rst_n), .duty_cycle_val(pump_b_duty_cycle), .pwm_signal(pump_b_pwm_out));
+    pwm_generator pump_b_pwm_gen (
+        .clk(clk), .reset(reset), 
+        .duty_cycle_val(w_pwm_duty_b), .pwm_signal(pwm_pump_b_out)
+    );
 
 endmodule
+
+// NOTE: This refactoring implies the creation of two new files:
+// 1. 'filter_fsm.sv' to contain the main state machine logic.
+// 2. 'debouncer.sv' if a more robust sensor input is desired.

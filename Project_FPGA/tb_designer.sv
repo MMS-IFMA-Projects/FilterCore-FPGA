@@ -10,28 +10,24 @@ module tb_designer;
 
     // --- Signals to connect to DUT ---
     logic clk;
-    logic rst_n;
-    logic [3:0] pico_data;
-    logic       pico_req;
-    logic       pico_ack;
-    logic       float_full;
-    logic       float_empty;
+    logic reset;
+    logic [3:0] data;
+    logic       req;
+    logic       ack;
+    logic       level_sensor;
     logic       pump_a_pwm;
     logic       pump_b_pwm;
-    logic       comm_error_led;
 
     // --- DUT Instantiation ---
     designer DUT (
         .clk(clk),
-        .rst_n(rst_n),
-        .pico_data_in(pico_data),
-        .pico_req_in(pico_req),
-        .pico_ack_out(pico_ack),
-        .float_full_in(float_full),
-        .float_empty_in(float_empty),
-        .pump_a_pwm_out(pump_a_pwm),
-        .pump_b_pwm_out(pump_b_pwm),
-        .comm_error_led_out(comm_error_led)
+        .reset(reset),
+        .data_in(data),
+        .req_in(req),
+        .ack_out(ack),
+        .level_sensor_in(level_sensor),
+        .pwm_pump_a_out(pump_a_pwm),
+        .pwm_pump_b_out(pump_b_pwm)
     );
 
     // --- Clock Generation ---
@@ -41,11 +37,11 @@ module tb_designer;
     // --- Task to simulate Pico transmission ---
     task transmit_handshake(input [3:0] data_to_send);
         @(posedge clk);
-        pico_req <= 1'b1; pico_data <= data_to_send;
-        wait (pico_ack == 1'b1);
+        req <= 1'b1; data <= data_to_send;
+        wait (ack == 1'b1);
         @(posedge clk);
-        pico_req <= 1'b0;
-        wait (pico_ack == 1'b0);
+        req <= 1'b0;
+        wait (ack == 1'b0);
         @(posedge clk);
         $display("[%0t ns] TB: Pico sent status %b.", $time, data_to_send);
     endtask
@@ -56,17 +52,12 @@ module tb_designer;
         $dumpvars(0, tb_designer); 
         
         // Initialize signals and apply reset
-        pico_req = 0; pico_data = '0;
-        float_full = 0; float_empty = 1; // Start with filter empty
-        rst_n = 1'b0;
+        req = 0; data = '0;
+        level_sensor = 1; // Start with filter empty
+        reset = 1'b1;
         #(CLK_PERIOD * 5);
-        rst_n = 1'b1;
+        reset = 1'b0;
         $display("[%0t ns] TB: System reset released.", $time);
-
-        // --- Test Case 1: Invalid data ---
-        $display("[%0t ns] TB_INFO: Sending invalid data '1111'.", $time);
-        transmit_handshake(4'b1111);
-        #(CLK_PERIOD * 10);
 
         // --- Test Case 2: Anomalous water starts the cycle ---
         $display("[%0t ns] TB_INFO: Water quality is bad (pH anomaly). Starting cycle.", $time);
@@ -74,7 +65,7 @@ module tb_designer;
 
         // Wait for the filter to fill
         #(CLK_PERIOD * 200);
-        float_full = 1'b1;
+        level_sensor = 0; // Sensor is WET
         $display("[%0t ns] TB_SENSOR: Float sensor FULL activated.", $time);
         
         // Wait in RETURNING state, then simulate water quality is OK
@@ -84,7 +75,7 @@ module tb_designer;
         
         // Wait for the filter to drain
         #(CLK_PERIOD * 200);
-        float_empty = 1'b1;
+        level_sensor = 1; // Sensor is EMPTY
         $display("[%0t ns] TB_SENSOR: Float sensor EMPTY activated. Cycle finished.", $time);
 
         #(CLK_PERIOD * 50);
