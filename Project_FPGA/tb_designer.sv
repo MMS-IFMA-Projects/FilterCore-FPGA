@@ -1,84 +1,94 @@
 /**
  * @file tb_designer.sv
- * @brief Testbench final e corrigido para o módulo 'designer'.
+ * @brief Testbench for the 'designer' module.
  */
  `timescale 1ns / 1ps
 module tb_designer;
 
-    // --- Parâmetros e Constantes ---
-    localparam  CLK_FPGA_PERIOD   = 20ns; // 50 MHz
-    localparam  CLK_BITDOG_PERIOD = 40ns; // 25 MHz
+    // --- Parameters ---
+    localparam CLK_PERIOD = 20ns; // 50 MHz clock
 
-    // --- Sinais para Conectar ao DUT (Device Under Test) ---
-    logic clk_fpga;
-    logic clk_bitdog;
-    logic reset;
-    logic [3:0] tb_dados;
-    logic       tb_req;
-    logic       tb_ack;
-    logic       tb_boia_cheia;
-    logic       tb_boia_vazia;
-    logic       pwm_ba, pwm_bb;
+    // --- Signals to connect to DUT ---
+    logic clk;
+    logic rst_n;
+    logic [3:0] pico_data;
+    logic       pico_req;
+    logic       pico_ack;
+    logic       float_full;
+    logic       float_empty;
+    logic       pump_a_pwm;
+    logic       pump_b_pwm;
+    logic       comm_error_led;
 
-    // --- Instanciação do Módulo de Design ---
+    // --- DUT Instantiation ---
     designer DUT (
-        .clk_fpga(clk_fpga), .reset(reset),
-        .i_dados(tb_dados), .i_req(tb_req), .o_ack(tb_ack),
-        .i_boia_cheia(tb_boia_cheia), .i_boia_vazia(tb_boia_vazia),
-        .o_pwm_bomba_a(pwm_ba), .o_pwm_bomba_b(pwm_bb)
+        .clk(clk),
+        .rst_n(rst_n),
+        .pico_data_in(pico_data),
+        .pico_req_in(pico_req),
+        .pico_ack_out(pico_ack),
+        .float_full_in(float_full),
+        .float_empty_in(float_empty),
+        .pump_a_pwm_out(pump_a_pwm),
+        .pump_b_pwm_out(pump_b_pwm),
+        .comm_error_led_out(comm_error_led)
     );
 
-    // --- Geração dos Clocks ---
-    initial clk_fpga = 0;
-    always #(CLK_FPGA_PERIOD / 2) clk_fpga = ~clk_fpga;
+    // --- Clock Generation ---
+    initial clk = 0;
+    always #(CLK_PERIOD / 2) clk = ~clk;
 
-    initial clk_bitdog = 0;
-    always #(CLK_BITDOG_PERIOD / 2) clk_bitdog = ~clk_bitdog;
-
-    // --- Tarefa para Simular o Transmissor da BitDogLab ---
+    // --- Task to simulate Pico transmission ---
     task transmit_handshake(input [3:0] data_to_send);
-        @(posedge clk_bitdog);
-        tb_req <= 1'b1; tb_dados <= data_to_send;
-        wait (tb_ack == 1'b1);
-        @(posedge clk_bitdog);
-        tb_req <= 1'b0;
-        wait (tb_ack == 1'b0);
-        @(posedge clk_bitdog);
-        $display("[%0t] BitDog: Status %b enviado.", $time, data_to_send);
+        @(posedge clk);
+        pico_req <= 1'b1; pico_data <= data_to_send;
+        wait (pico_ack == 1'b1);
+        @(posedge clk);
+        pico_req <= 1'b0;
+        wait (pico_ack == 1'b0);
+        @(posedge clk);
+        $display("[%0t ns] TB: Pico sent status %b.", $time, data_to_send);
     endtask
 
-    // --- Sequência Principal de Testes ---
+    // --- Main Test Sequence ---
     initial begin
         $dumpfile("onda.vcd"); 
         $dumpvars(0, tb_designer); 
         
-        reset = 1; tb_req = 0; tb_dados = '0;
-        tb_boia_cheia = 0; tb_boia_vazia = 1;
-        #100ns;
-        reset = 0;
+        // Initialize signals and apply reset
+        pico_req = 0; pico_data = '0;
+        float_full = 0; float_empty = 1; // Start with filter empty
+        rst_n = 1'b0;
+        #(CLK_PERIOD * 5);
+        rst_n = 1'b1;
+        $display("[%0t ns] TB: System reset released.", $time);
 
-        #50ns;
-        $display("[%0t] TESTE: Agua anomala! (pH anomalo -> 4'b0100)", $time);
-        transmit_handshake(4'b0100);
+        // --- Test Case 1: Invalid data ---
+        $display("[%0t ns] TB_INFO: Sending invalid data '1111'.", $time);
+        transmit_handshake(4'b1111);
+        #(CLK_PERIOD * 10);
 
-        #4000ns;
-        tb_boia_cheia = 1;
-        $display("[%0t] SENSOR: Boia Cheia ativada.", $time);
+        // --- Test Case 2: Anomalous water starts the cycle ---
+        $display("[%0t ns] TB_INFO: Water quality is bad (pH anomaly). Starting cycle.", $time);
+        transmit_handshake(4'b0100); // pH está ruim
+
+        // Wait for the filter to fill
+        #(CLK_PERIOD * 200);
+        float_full = 1'b1;
+        $display("[%0t ns] TB_SENSOR: Float sensor FULL activated.", $time);
         
-        #4000ns;
-        tb_boia_vazia = 1;
-        $display("[%0t] SENSOR: Boia Vazia ativada.", $time);
+        // Wait in RETURNING state, then simulate water quality is OK
+        #(CLK_PERIOD * 200);
+        $display("[%0t ns] TB_INFO: Water quality is now OK. Stopping cycle.", $time);
+        transmit_handshake(4'b0000); // Todos os sensores OK
         
-        #4000ns;
-        $display("[%0t] TESTE: Agua OK! (Status -> 4'b0000)", $time);
-        transmit_handshake(4'b0000);
+        // Wait for the filter to drain
+        #(CLK_PERIOD * 200);
+        float_empty = 1'b1;
+        $display("[%0t ns] TB_SENSOR: Float sensor EMPTY activated. Cycle finished.", $time);
 
-        #4000ns;
-        tb_boia_vazia = 1;
-        $display("[%0t] SENSOR: Boia Vazia ativada (para finalizar o STOPPING).", $time);
-
-        #500ns;
-        $display("[%0t] SIMULACAO: Fim do teste.", $time);
+        #(CLK_PERIOD * 50);
+        $display("[%0t ns] SIMULATION: Test finished.", $time);
         $finish;
     end
 endmodule

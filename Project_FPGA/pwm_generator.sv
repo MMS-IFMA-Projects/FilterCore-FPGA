@@ -1,24 +1,24 @@
 /**
  * @file pwm_generator.sv
- * @brief Módulo que gera uma forma de onda PWM.
+ * @brief Module that generates a PWM waveform.
  */
 module pwm_generator #(
     parameter int WIDTH = 8
 ) (
-    input wire clk_fpga,
-    input wire reset,
-    input wire [WIDTH-1:0] i_duty_cycle,
-    output logic o_pwm_out
+    input wire clk,
+    input wire rst_n, // Active-low reset
+    input wire [WIDTH-1:0] duty_cycle_val,
+    output logic pwm_signal
 );
-    logic [WIDTH-1:0] counter = '0;
+    logic [WIDTH-1:0] pwm_counter = '0;
 
-    always_ff @(posedge clk_fpga or posedge reset) begin
-        if (reset) begin
-            counter <= '0;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            pwm_counter <= '0;
         end else begin
-            counter <= counter + 1;
+            pwm_counter <= pwm_counter + 1;
         end
     end
 
-    assign o_pwm_out = (counter < i_duty_cycle);
+    assign pwm_signal = (pwm_counter < duty_cycle_val);
 endmodule

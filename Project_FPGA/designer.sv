@@ -1,78 +1,107 @@
 /**
  * @file designer.sv
- * @brief Módulo Top-Level que implementa a lógica de controle de filtragem final.
+ * @brief Top-level module that implements the filtration control logic.
  */
 module designer (
-    // Clock e Reset
-    input wire clk_fpga, input wire reset,
-    // Interface com a BitDogLab (agora com 4 bits de dados)
-    input wire [3:0] i_dados, input wire i_req, output logic o_ack,
-    // Interface com os Sensores de Nível
-    input wire i_boia_cheia, input wire i_boia_vazia,
-    // Saídas para as Bombas
-    output logic o_pwm_bomba_a, output logic o_pwm_bomba_b
+    // Clock and Reset
+    input wire clk,
+    input wire rst_n, // Active-low reset
+
+    // Interface with Pico
+    input wire [3:0] pico_data_in,
+    input wire pico_req_in,
+    output logic pico_ack_out,
+
+    // Float Sensor Interface
+    input wire float_full_in,
+    input wire float_empty_in,
+
+    // Pump PWM Outputs
+    output logic pump_a_pwm_out,
+    output logic pump_b_pwm_out,
+    output logic comm_error_led_out // Optional: for the invalid data pulse
 );
-    typedef enum logic [1:0] {STOP, RUNNING_FILLING, RUNNING_RETURNING, STOPPING} state_t;
+    typedef enum logic [1:0] {IDLE, FILLING, RETURNING, DRAINING} state_t;
 
-    logic [3:0] dados_recebidos;
-    logic       novo_dado_chegou;
-    logic [3:0] reg_status_estrategico = 4'b0; // Armazena os 4 bits de status
-    
-    logic boia_cheia_sync, boia_vazia_sync;
-    state_t estado_atual, proximo_estado;
+    // Signals from the handshake_receiver
+    logic [3:0] received_data;
+    logic       new_data_received;
+    logic       invalid_data_received;
 
-    always_ff @(posedge clk_fpga) begin
-        boia_cheia_sync <= i_boia_cheia;
-        boia_vazia_sync <= i_boia_vazia;
-    end
-
-    handshake_receiver #( .DATA_WIDTH(4) ) FSM_comm (
-        .clk_fpga(clk_fpga), .reset(reset), .i_dados(i_dados), .i_req(i_req), .o_ack(o_ack),
-        .o_dados_validos(dados_recebidos), .o_novo_dado_pronto(novo_dado_chegou)
+    // Instantiate the communication module
+    handshake_receiver #( .DATA_WIDTH(4) ) comm_inst (
+        .clk(clk), 
+        .rst_n(rst_n),
+        .data_in(pico_data_in), 
+        .req_in(pico_req_in), 
+        .ack_out(pico_ack_out),
+        .data_out(received_data), 
+        .new_data_pulse(new_data_received),
+        .invalid_data_pulse(invalid_data_received)
     );
 
+    logic [3:0] strategic_status_reg = 4'b0;
+    logic float_full_sync, float_empty_sync;
+    state_t current_state, next_state;
+
+    // Synchronize asynchronous float sensor inputs
+    always_ff @(posedge clk) begin
+        float_full_sync  <= float_full_in;
+        float_empty_sync <= float_empty_in;
+    end
+
     always_comb begin
-        proximo_estado = estado_atual;
-        // A lógica de transição principal é baseada no status recebido OU nas boias
-        case (estado_atual)
-            STOP:
-                // Se algum bit de status for '1' (anomalia ou botão), inicia o ciclo
-                if (|dados_recebidos) proximo_estado = RUNNING_FILLING;
-            RUNNING_FILLING:
-                if (boia_cheia_sync) proximo_estado = RUNNING_RETURNING;
-            RUNNING_RETURNING:
-                // Se a qualidade da água voltar ao normal (todos os bits de status = 0), para.
-                if (&(~dados_recebidos)) proximo_estado = STOPPING;
-                // Senão, se o filtro esvaziar, continua o ciclo
-                else if (boia_vazia_sync) proximo_estado = RUNNING_FILLING;
-            STOPPING:
-                if (boia_vazia_sync) proximo_estado = STOP;
+        next_state = current_state;
+        // Main transition logic based on received status OR float sensors
+        case (current_state)
+            IDLE:
+                // If any status bit is '1' (anomaly or button), start the cycle
+                if (|strategic_status_reg) next_state = FILLING;
+            FILLING:
+                if (float_full_sync) next_state = RETURNING;
+            RETURNING:
+                // If water quality returns to normal (all status bits = 0), stop.
+                if (&(~strategic_status_reg)) next_state = DRAINING;
+                // Otherwise, if the filter empties, continue the cycle
+                else if (float_empty_sync) next_state = FILLING;
+            DRAINING:
+                if (float_empty_sync) next_state = IDLE;
         endcase
     end
 
-    always_ff @(posedge clk_fpga or posedge reset) begin
-        if (reset) begin
-            estado_atual <= STOP;
-            reg_status_estrategico <= 4'b0;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            current_state <= IDLE;
+            strategic_status_reg <= 4'b0;
         end else begin
-            estado_atual <= proximo_estado;
-            if (novo_dado_chegou) reg_status_estrategico <= dados_recebidos;
+            current_state <= next_state;
+        end
+    end
+    
+    // Data capture logic
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            strategic_status_reg <= 4'b0;
+        end else if (new_data_received) begin
+            strategic_status_reg <= received_data;
         end
     end
 
-    logic [7:0] pwm_bomba_a, pwm_bomba_b;
-    localparam PWM_HIGH = 8'd230; // 90%
-    
+    assign comm_error_led_out = invalid_data_received;
+
+    logic [7:0] pump_a_duty_cycle, pump_b_duty_cycle;
+    localparam PWM_HIGH_DUTY = 8'd230; // 90%
+
     always_comb begin
-        pwm_bomba_a = 8'h00; pwm_bomba_b = 8'h00; // Padrão
-        case (estado_atual)
-            RUNNING_FILLING:   pwm_bomba_a = PWM_HIGH;
-            RUNNING_RETURNING: pwm_bomba_b = PWM_HIGH;
-            STOPPING:          pwm_bomba_b = PWM_HIGH; // Continua esvaziando para parar
+        pump_a_duty_cycle = 8'h00; pump_b_duty_cycle = 8'h00; // Default off
+        case (current_state)
+            FILLING:   pump_a_duty_cycle = PWM_HIGH_DUTY;
+            RETURNING: pump_b_duty_cycle = PWM_HIGH_DUTY;
+            DRAINING:  pump_b_duty_cycle = PWM_HIGH_DUTY; // Continues draining to stop
         endcase
     end
 
-    pwm_generator PWM_BA (.clk_fpga(clk_fpga), .reset(reset), .i_duty_cycle(pwm_bomba_a), .o_pwm_out(o_pwm_bomba_a));
-    pwm_generator PWM_BB (.clk_fpga(clk_fpga), .reset(reset), .i_duty_cycle(pwm_bomba_b), .o_pwm_out(o_pwm_bomba_b));
+    pwm_generator pump_a_pwm_gen (.clk(clk), .rst_n(rst_n), .duty_cycle_val(pump_a_duty_cycle), .pwm_signal(pump_a_pwm_out));
+    pwm_generator pump_b_pwm_gen (.clk(clk), .rst_n(rst_n), .duty_cycle_val(pump_b_duty_cycle), .pwm_signal(pump_b_pwm_out));
 
 endmodule

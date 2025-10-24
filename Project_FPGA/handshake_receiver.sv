@@ -1,48 +1,69 @@
 /**
  * @file handshake_receiver.sv
- * @brief Módulo receptor com protocolo de handshake assíncrono.
+ * @brief Asynchronous handshake receiver module.
  */
 module handshake_receiver #(
     parameter int DATA_WIDTH = 4
 ) (
-    input wire clk_fpga, input wire reset,
-    input wire [DATA_WIDTH-1:0] i_dados, input wire i_req,
-    output logic o_ack,
-    output logic [DATA_WIDTH-1:0] o_dados_validos,
-    output logic o_novo_dado_pronto
+    input  wire clk,
+    input  wire rst_n, // Active-low reset
+    input  wire [DATA_WIDTH-1:0] data_in,
+    input  wire req_in,
+    output logic ack_out,
+    output logic [DATA_WIDTH-1:0] data_out,
+    output logic new_data_pulse,
+    output logic invalid_data_pulse
 );
     logic req_sync1, req_sync2;
-    always_ff @(posedge clk_fpga or posedge reset) begin
-        if (reset) {req_sync1, req_sync2} <= 2'b0;
-        else       {req_sync1, req_sync2} <= {i_req, req_sync1};
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) {req_sync1, req_sync2} <= 2'b0;
+        else        {req_sync1, req_sync2} <= {req_in, req_sync1};
     end
 
+    // Validation function: checks if the data is "useful and safe".
+    // Example: '1111' is considered a forbidden/invalid state.
+    function automatic bit is_data_valid(input [DATA_WIDTH-1:0] data);
+        return (data != '1); // Returns '0' if all bits are '1', otherwise '1'.
+    endfunction
+
     typedef enum logic [1:0] {IDLE, LATCH_DATA, WAIT_REQ_LOW} state_t;
-    state_t estado_atual, proximo_estado;
+    state_t current_state, next_state;
 
     always_comb begin
-        proximo_estado = estado_atual;
-        case (estado_atual)
-            IDLE:         if (req_sync2) proximo_estado = LATCH_DATA;
-            LATCH_DATA:   proximo_estado = WAIT_REQ_LOW;
-            WAIT_REQ_LOW: if (!req_sync2) proximo_estado = IDLE;
+        next_state = current_state;
+        case (current_state)
+            IDLE:         if (req_sync2) next_state = LATCH_DATA;
+            LATCH_DATA:   next_state = WAIT_REQ_LOW;
+            WAIT_REQ_LOW: if (!req_sync2) next_state = IDLE;
         endcase
     end
 
-    always_ff @(posedge clk_fpga or posedge reset) begin
-        if (reset) begin
-            estado_atual     <= IDLE;
-            o_ack            <= 1'b0;
-            o_dados_validos  <= '0;
-            o_novo_dado_pronto <= 1'b0;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            current_state      <= IDLE;
+            ack_out            <= 1'b0;
+            data_out           <= '0;
+            new_data_pulse     <= 1'b0;
+            invalid_data_pulse <= 1'b0;
         end else begin
-            estado_atual <= proximo_estado;
-            o_novo_dado_pronto <= (estado_atual == IDLE) && (proximo_estado == LATCH_DATA);
-            if ((estado_atual == IDLE) && (proximo_estado == LATCH_DATA)) begin
-                o_dados_validos <= i_dados;
-                o_ack           <= 1'b1;
-            end else if ((estado_atual == WAIT_REQ_LOW) && (proximo_estado == IDLE)) begin
-                o_ack <= 1'b0;
+            current_state <= next_state;
+
+            // On the transition to capture data...
+            if ((current_state == IDLE) && (next_state == LATCH_DATA)) begin
+                ack_out <= 1'b1; // Raise ACK to confirm reception
+                if (is_data_valid(data_in)) begin
+                    data_out           <= data_in; // Capture the valid data
+                    new_data_pulse     <= 1'b1;    // Pulse to signal "new valid data"
+                    invalid_data_pulse <= 1'b0;
+                end else begin
+                    // Data is invalid, do not propagate it and signal the error.
+                    new_data_pulse     <= 1'b0;
+                    invalid_data_pulse <= 1'b1;    // Pulse to signal "invalid data"
+                end
+            end else if ((current_state == WAIT_REQ_LOW) && (next_state == IDLE)) begin
+                ack_out            <= 1'b0;    // Lower ACK
+                new_data_pulse     <= 1'b0;    // Ensure both pulses are terminated
+                invalid_data_pulse <= 1'b0;
             end
         end
     end

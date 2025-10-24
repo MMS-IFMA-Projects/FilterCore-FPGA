@@ -1,26 +1,26 @@
 @echo off
 cls
-echo [INFO] Iniciando a simulacao com Icarus Verilog...
+echo [INFO] Starting simulation with Icarus Verilog...
 echo.
 
-REM --- Etapa 1: Compila todos os arquivos .sv e cria o executavel da simulacao ---
-echo [PASSO 1/2] Compilando o projeto...
+REM --- Step 1: Compile all .sv files and create the simulation executable ---
+echo [STEP 1/2] Compiling the project...
 iverilog -g2012 -o designer.vvp handshake_receiver.sv pwm_generator.sv designer.sv tb_designer.sv
 
-REM Verifica se a compilação falhou
+REM Check if compilation failed
 IF %ERRORLEVEL% NEQ 0 (
-    echo [ERRO] Falha na compilacao. Verifique as mensagens de erro acima.
+    echo [ERROR] Compilation failed. Check error messages above.
     pause
     goto :eof
 )
 
-REM --- Etapa 2: Executa a simulação ---
-echo [PASSO 2/2] Rodando a simulacao...
+REM --- Step 2: Run the simulation ---
+echo [STEP 2/2] Running the simulation...
 vvp designer.vvp
 
 echo.
 echo --------------------------------------------------------------------
-echo [SUCESSO] Simulacao concluida! O arquivo 'onda.vcd' foi gerado.
+echo [SUCCESS] Simulation completed! The 'onda.vcd' file has been generated.
 echo --------------------------------------------------------------------
 
 pause
