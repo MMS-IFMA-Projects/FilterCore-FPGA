@@ -56,6 +56,8 @@
         "tds_screen.h": "c",
         "temperature_screen.h": "c",
         "queue.h": "c",
-        "sensor_configs.h": "c"
+        "sensor_configs.h": "c",
+        "i2c_configs.h": "c",
+        "i2c.h": "c"
     }
 }
