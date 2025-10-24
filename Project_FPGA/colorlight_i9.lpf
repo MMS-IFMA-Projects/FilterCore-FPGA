@@ -10,15 +10,17 @@ FREQUENCY PORT "clk" 25.0 MHz;
 # --- Communication Interface with BitDogLab (6 pins) ---
 LOCATE COMP "data_in[0]" SITE "F2";
 IOBUF PORT "data_in[0]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "data_in[1]" SITE "E4"; IOBUF PORT "data_in[1]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+LOCATE COMP "data_in[1]" SITE "E4"; 
+IOBUF PORT "data_in[1]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
 LOCATE COMP "data_in[2]" SITE "F1";
 IOBUF PORT "data_in[2]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "data_in[3]" SITE "F3"; IOBUF PORT "data_in[3]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "req_in" SITE "G3"; IOBUF PORT "req_in" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+LOCATE COMP "data_in[3]" SITE "F3"; 
+IOBUF PORT "data_in[3]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+LOCATE COMP "req_in" SITE "G3"; 
+IOBUF PORT "req_in" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
 LOCATE COMP "ack_out" SITE "H3";
 IOBUF PORT "ack_out" IO_TYPE=LVCMOS33 DRIVE=8;
 
-# --- UPDATED: Single Level Sensor (5cm from bottom) ---
 # Assumes sensor is '1' (HIGH) when EMPTY, and pulls to '0' (GND) when WET.
 LOCATE COMP "level_sensor_in" SITE "H4";
 IOBUF PORT "level_sensor_in" IO_TYPE=LVCMOS33 PULLMODE=UP; 
