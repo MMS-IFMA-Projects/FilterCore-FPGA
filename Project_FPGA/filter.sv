@@ -80,7 +80,28 @@ always_comb begin
             next_state = STOP;
 
     endcase
-   
 end
 
+// --- FSM State Register ---
+always_ff @(posedge clk or posedge reset) begin
+    if (reset) current_state <= STOP;
+    else current_state <= next_state;
+end
+
+// --- FSM Output (Pump Control) ---
+always_comb begin
+    pwm_duty_a = 8'h00;
+    pwm_duty_b = 8'h00;
+
+    case (current_state)
+        FILLING: pwm_duty_a = PWM_MAX;
+        DRAINING_MIN: pwm_duty_b = PWM_MIN;
+        DRAINING_MAX: pwm_duty_b = PWM_MAX;
+        STOPPING: pwm_duty_b = PWM_MAX;
+        default: begin
+            pwm_duty_a = 8'h00;
+            pwm_duty_b = 8'h00;
+        end
+    endcase
+end
 endmodule
