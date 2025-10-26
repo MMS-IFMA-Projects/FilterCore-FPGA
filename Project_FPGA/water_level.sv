@@ -1,12 +1,13 @@
-module water_level (
+module water_level #(
+    parameter int CLK_FREQ = 50_000_000, //50MHz Clock
+    parameter int STABLE_MS = 20        //20ms Stable Time
+) (
     input wire clk,
     input wire  reset,
     input wire signal_async,
     output logic signal_stable
 );
     // --- Parameters ---
-    localparam int CLK_FREQ = 50_000_000; //50MHz Clock
-    localparam int STABLE_MS = 20;        //20ms Stable Time
     localparam int COUNTER_LIMIT = (CLK_FREQ / 1000) * STABLE_MS;
     
     // --- Counting and validation ---
