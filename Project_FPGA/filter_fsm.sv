@@ -1,4 +1,4 @@
-module filter(
+module filter_fsm(
     input wire clk,
     input wire reset,
 
