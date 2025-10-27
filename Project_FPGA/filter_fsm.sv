@@ -1,4 +1,7 @@
-module filter_fsm (
+module filter_fsm #(
+    parameter int PUMP_A_FILL_TIME_CYCLES = 33'd6_000_000_000, // 2 minutes @ 50 MHz
+    parameter int PUMP_B_TIMER_CYCLES = 250_000_000 // 5 seconds @ 50 MHz
+) (
     input wire clk,
     input wire reset,
 
@@ -14,8 +17,6 @@ module filter_fsm (
     // --- Parameters ---
     localparam PWM_MAX = 8'd230;
     localparam PWM_MIN = 8'd77;
-    localparam int PUMP_B_TIMER_CYCLES = 250_000_000; // 5 seconds @ 50 MHz
-    localparam int PUMP_A_FILL_TIME_CYCLES = 33'd6_000_000_000; // 2 minutes @ 50 MHz
 
     // --- FSM States ---
     typedef enum logic [2:0] {

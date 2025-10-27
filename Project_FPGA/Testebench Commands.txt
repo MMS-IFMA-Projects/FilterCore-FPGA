@@ -1,0 +1,8 @@
+# Compile all files at once
+iverilog -g2012 -o design.vvp tb_design.sv design.sv filter_fsm.sv handshake_fsm.sv water_level.sv pwm_generator.sv
+
+# Run the simulation
+vvp design.vvp
+
+# View waveforms
+gtkwave design.vcd
