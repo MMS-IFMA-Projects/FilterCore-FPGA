@@ -73,6 +73,7 @@ simulation/
 *.srr
 *.tcl.log
 *.vcd
+*.vvp
 *.wlf
 *.wdb
 
