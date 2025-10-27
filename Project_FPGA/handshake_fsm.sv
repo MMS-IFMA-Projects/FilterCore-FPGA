@@ -1,7 +1,3 @@
-/**
- * @file handshake_fsm.sv
- * @brief Asynchronous handshake receiver module.
- */
 module handshake_fsm #(
     parameter int DATA_WIDTH = 4
 ) (
@@ -14,7 +10,7 @@ module handshake_fsm #(
 
     // Outputs for the protocol
     output logic ack,
-    output logic new_data_pulse,
+    output logic new_data_pulse
 );
 
     // --- 2-pulse synchronisation ---
@@ -36,7 +32,7 @@ module handshake_fsm #(
     // --- Data verification ---
     logic data_is_corrupt;
     always_comb begin
-        data_is_corrupt = $isunknown(data)
+        data_is_corrupt = $isunknown(data);
     end
 
     // --- FSM State Transition Logic ---

@@ -1,7 +1,3 @@
-/**
- * @file pwm_generator.sv
- * @brief Module that generates a PWM waveform.
- */
 module pwm_generator #(
     parameter int WIDTH = 8
 ) (

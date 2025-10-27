@@ -12,11 +12,12 @@ module water_level #(
     
     // --- Counting and validation ---
     logic [19:0] counter = '0;
-    logic signal_sync;
 
     // --- 2-stage synchronizer ---
+    logic signal_sync1, signal_sync2;
     always_ff @(posedge clk) begin
-        signal_sync <= signal_async;
+        signal_sync1 <= signal_async;
+        signal_sync2 <= signal_sync1;
     end
 
     always_ff @(posedge clk or posedge reset) begin
@@ -25,10 +26,10 @@ module water_level #(
             counter <= '0;
         end
         else begin
-            if (signal_sync != signal_stable) begin
+            if (signal_sync2 != signal_stable) begin
                 if(counter < COUNTER_LIMIT) counter <= counter + 1;
                 else begin
-                    signal_stable <= signal_sync;
+                    signal_stable <= signal_sync2;
                     counter <= '0;
                 end
             end

@@ -1,11 +1,6 @@
-/**
- * @file design.sv
- * @brief Top-level module that instantiates and connects all sub-modules.
- */
-module design (
-    // Clock and Reset
+module filter_core_design (
     input wire clk,
-    input wire reset, // Active-high reset
+    input wire reset,
 
     // Interface with Pico
     input wire [3:0] data, 
@@ -29,13 +24,13 @@ module design (
 
     // --- 1. Handshake Receiver ---
     // Manages REQ/ACK, validates data, and provides a pulse when new data arrives.
-    handshake_receiver #( .DATA_WIDTH(4) ) inst_handshake (
+    handshake_fsm #( .DATA_WIDTH(4) ) inst_handshake (
         .clk(clk), 
         .reset(reset),
         .data(data), 
         .req(req), 
         .ack(ack),
-        .new_data_pulse(new_data_pulse),
+        .new_data_pulse(new_data_pulse)
     );
 
     // --- 2. Data Latch ---
@@ -55,11 +50,11 @@ module design (
         .reset(reset),
         .signal_async(level_sensor),
         .signal_stable(level_is_empty)
-    )
+    );
 
     // --- 4. Filter Control FSM ---
     // The main brain of the system.
-    filter_fsm fsm_inst (
+    filter_fsm inst_filter (
         .clk(clk),
         .reset(reset),
         .status_data(reg_strategic_status),

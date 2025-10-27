@@ -1,4 +1,4 @@
-module filter_fsm(
+module filter_fsm (
     input wire clk,
     input wire reset,
 
@@ -15,10 +15,10 @@ module filter_fsm(
     localparam PWM_MAX = 8'd230;
     localparam PWM_MIN = 8'd77;
     localparam int PUMP_B_TIMER_CYCLES = 250_000_000; // 5 seconds @ 50 MHz
-    localparam int PUMP_A_FILL_TIME_CYCLES 6_000_000_000; // 2 minutes @ 50 MHz
+    localparam int PUMP_A_FILL_TIME_CYCLES = 33'd6_000_000_000; // 2 minutes @ 50 MHz
 
     // --- FSM States ---
-    typedef enum logic {
+    typedef enum logic [2:0] {
         STOP,
         FILLING,
         DRAINING_MIN,
@@ -29,18 +29,22 @@ module filter_fsm(
     state_t current_state, next_state;
 
     // --- Timers ---
-    logic [29:0] timer_pump_a;
+    logic [32:0] timer_pump_a;
     logic [27:0] timer_pump_b;
     logic pump_a_timer_expired;
     logic pump_b_timer_expired;
+
+    // --- System criticality variable ---
+    wire is_critical;
+    assign is_critical = (|status_data);
 
     // --- Pump A Timer (Fill Timer) ---
     always_ff @(posedge clk or posedge reset) begin
         if (reset) timer_pump_a <= '0;
         else if (current_state == FILLING) begin
             if(!pump_a_timer_expired) timer_pump_a <= timer_pump_a + 1;
-            else timer_pump_a <= '0;
         end
+        else timer_pump_a <= '0;
     end
 
     assign pump_a_timer_expired = (timer_pump_a >= PUMP_A_FILL_TIME_CYCLES);
@@ -48,11 +52,10 @@ module filter_fsm(
     // --- Pump B Timer (Min/Max Timer) ---
     always_ff @(posedge clk or posedge reset) begin
         if (reset) timer_pump_b <= '0;
-        else if (current_state == DRAINING_MIN && next_state != DRAINING_MIN) timer_pump_b <= '0;
         else if (current_state == DRAINING_MIN) begin
             if(!pump_b_timer_expired) timer_pump_b <= timer_pump_b + 1;
-            else timer_pump_b <= '0;
         end
+        else timer_pump_b <= '0;
     end
 
     assign pump_b_timer_expired = (timer_pump_b >= PUMP_B_TIMER_CYCLES);
@@ -60,7 +63,6 @@ module filter_fsm(
     // --- FSM State Transition Logic ---
     always_comb begin
         next_state = current_state;
-        logic is_critical = (|status_data);
 
         case (current_state)
             STOP:
@@ -73,12 +75,11 @@ module filter_fsm(
                 else if (is_empty && is_critical) next_state = FILLING;
             DRAINING_MAX:
                 if (!is_critical) next_state = STOPPING;
-                else if (is_empty && !is_critical) next_state = FILLING;
+                else if (is_empty && is_critical) next_state = FILLING;
             STOPPING:
                 if (is_empty) next_state = STOP;
             default:
                 next_state = STOP;
-
         endcase
     end
 
