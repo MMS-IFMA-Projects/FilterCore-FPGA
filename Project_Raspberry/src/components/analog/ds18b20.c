@@ -5,7 +5,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define DS18B20_PIN 16 // gpio pin where the DS18B20 is connected
+#define DS18B20_PIN 2 // gpio pin where the DS18B20 is connected
 
 static void init_procedure(){
     gpio_set_dir(DS18B20_PIN, GPIO_OUT);
