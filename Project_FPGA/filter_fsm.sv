@@ -1,5 +1,4 @@
 module filter_fsm #(
-    parameter int PUMP_A_FILL_TIME_CYCLES = 33'd6_000_000_000, // 2 minutes @ 50 MHz
     parameter int PUMP_B_TIMER_CYCLES = 250_000_000 // 5 seconds @ 50 MHz
 ) (
     input wire clk,
@@ -7,8 +6,9 @@ module filter_fsm #(
 
     // Input from other modules
     input wire [3:0] status_data,
-    input wire is_empty,
-
+    input wire level_b_empty,
+    input wire level_a_full,
+    
     // Output to PWM generator
     output logic [7:0] pwm_duty_a,
     output logic [7:0] pwm_duty_b
@@ -30,25 +30,12 @@ module filter_fsm #(
     state_t current_state, next_state;
 
     // --- Timers ---
-    logic [32:0] timer_pump_a;
     logic [27:0] timer_pump_b;
-    logic pump_a_timer_expired;
     logic pump_b_timer_expired;
 
     // --- System criticality variable ---
     wire is_critical;
     assign is_critical = (|status_data);
-
-    // --- Pump A Timer (Fill Timer) ---
-    always_ff @(posedge clk or posedge reset) begin
-        if (reset) timer_pump_a <= '0;
-        else if (current_state == FILLING) begin
-            if(!pump_a_timer_expired) timer_pump_a <= timer_pump_a + 1;
-        end
-        else timer_pump_a <= '0;
-    end
-
-    assign pump_a_timer_expired = (timer_pump_a >= PUMP_A_FILL_TIME_CYCLES);
 
     // --- Pump B Timer (Min/Max Timer) ---
     always_ff @(posedge clk or posedge reset) begin
@@ -69,25 +56,20 @@ module filter_fsm #(
             STOP:
                 if (is_critical) next_state = FILLING;
             FILLING:
-                if (pump_a_timer_expired) next_state = DRAINING_MIN;
+                if(!is_critical) next_state = STOPPING;
+                else if (!level_a_full) next_state = DRAINING_MIN;
             DRAINING_MIN:
                 if (!is_critical) next_state = STOPPING;
+                else if (level_b_empty && is_critical) next_state = FILLING;
                 else if (pump_b_timer_expired) next_state = DRAINING_MAX;
-                else if (is_empty && is_critical) next_state = FILLING;
             DRAINING_MAX:
                 if (!is_critical) next_state = STOPPING;
-                else if (is_empty && is_critical) next_state = FILLING;
+                else if (level_b_empty && is_critical) next_state = FILLING;
             STOPPING:
-                if (is_empty) next_state = STOP;
+                if (level_b_empty) next_state = STOP;
             default:
                 next_state = STOP;
         endcase
-    end
-
-    // --- FSM State Register ---
-    always_ff @(posedge clk or posedge reset) begin
-        if (reset) current_state <= STOP;
-        else current_state <= next_state;
     end
 
     // --- FSM Output (Pump Control) ---
@@ -96,14 +78,29 @@ module filter_fsm #(
         pwm_duty_b = 8'h00;
 
         case (current_state)
-            FILLING: pwm_duty_a = PWM_MAX;
-            DRAINING_MIN: pwm_duty_b = PWM_MIN;
-            DRAINING_MAX: pwm_duty_b = PWM_MAX;
-            STOPPING: pwm_duty_b = PWM_MAX;
+            FILLING: begin
+                pwm_duty_a = PWM_MAX;
+                if(!level_b_empty) pwm_duty_b = PWM_MAX;
+            end
+            DRAINING_MIN: begin
+                pwm_duty_b = PWM_MIN;
+            end
+            DRAINING_MAX: begin
+                pwm_duty_b = PWM_MAX;
+            end
+            STOPPING: begin
+                if(!level_b_empty) pwm_duty_b = PWM_MAX;
+            end
             default: begin
                 pwm_duty_a = 8'h00;
                 pwm_duty_b = 8'h00;
             end
         endcase
+    end
+
+    // --- FSM State Register ---
+    always_ff @(posedge clk or posedge reset) begin
+        if (reset) current_state <= STOP;
+        else current_state <= next_state;
     end
 endmodule

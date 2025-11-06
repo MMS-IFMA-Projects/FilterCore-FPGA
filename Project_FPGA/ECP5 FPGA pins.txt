@@ -1,0 +1,15 @@
+# Water Level
+E3		PL11B		Water Level A
+A3		PL5C		Water Level B
+
+# Pump
+N17		PR35A		Pump A
+N18		PR32C		Pump B
+
+# Digital Communication
+B19		PT65B		data[0]
+A18		PT65A		data[1]
+C2		PL14D		data[2]
+B20		PT67B		data[3]
+E2		PL23D		req
+A19		PT67A		ack
