@@ -8,6 +8,7 @@
 #define REQ_PIN 9
 #define ACK_PIN 8
 
+void reset_fpga_setup(void);
 void handshake_setup(void);
 void handshake_request(normalized_sensors_data_t data);
 bool handshake_acknowledge(void);

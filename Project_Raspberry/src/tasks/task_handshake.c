@@ -7,6 +7,9 @@
 static void task_handshake(void *params){
     printf("[Started] | [Task 4] | [Handshake]\n");
 
+    // Reset FPGA setup
+    reset_fpga_setup();
+
     // Data pin initiation
     handshake_setup();
 

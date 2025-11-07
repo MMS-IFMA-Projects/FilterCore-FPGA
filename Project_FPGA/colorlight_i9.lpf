@@ -1,35 +1,27 @@
-# Physical Constraints File (.lpf) for the Filter Core Project
-# Board: Colorlight (P4 connector)
-# FPGA: Lattice ECP5 LFE5U-45
-
 # --- Main FPGA Clock (25MHz onboard oscillator) ---
-LOCATE COMP "clk" SITE "P3";
-IOBUF PORT "clk" IO_TYPE=LVCMOS33;
-FREQUENCY PORT "clk" 25.0 MHz;
-
-# --- Communication Interface with BitDogLab (6 pins) ---
-LOCATE COMP "data[0]" SITE "B19";
-IOBUF PORT "data[0]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "data[1]" SITE "A18"; 
-IOBUF PORT "data[1]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "data[2]" SITE "C2";
-IOBUF PORT "data[2]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "data[3]" SITE "B20"; 
-IOBUF PORT "data[3]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "req" SITE "E2"; 
-IOBUF PORT "req" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "ack" SITE "A19"; IOBUF PORT "ack" IO_TYPE=LVCMOS33 DRIVE=8;
-
-# Assumes sensor is '1' (HIGH) when EMPTY, and pulls to '0' (GND) when WET.
-LOCATE COMP "level_sensor_b" SITE "A3";
-IOBUF PORT "level_sensor_b" IO_TYPE=LVCMOS33 PULLMODE=UP; 
-
-LOCATE COMP "level_sensor_a" SITE "E3";
-IOBUF PORT "level_sensor_a" IO_TYPE=LVCMOS33 PULLMODE=UP; 
-
-# --- PWM Outputs for Actuators (2 Pumps) ---
-LOCATE COMP "pwm_pump_a" SITE "N17"; IOBUF PORT "pwm_pump_a" IO_TYPE=LVCMOS33 DRIVE=8;
-LOCATE COMP "pwm_pump_b" SITE "N18"; IOBUF PORT "pwm_pump_b" IO_TYPE=LVCMOS33 DRIVE=8;
+LOCATE COMP "clk" SITE "P3"; IOBUF PORT "clk" IO_TYPE=LVCMOS33; FREQUENCY PORT "clk" 25.0 MHz;
 
 # --- Reset ---
-IOBUF PORT "reset" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+LOCATE COMP "reset" SITE "B18"; IOBUF PORT "reset" IO_TYPE=LVCMOS33 PULLMODE=DOWN;      #PT62B
+
+# --- Communication Interface with BitDogLab (6 pins) ---
+LOCATE COMP "data[0]" SITE "B19"; IOBUF PORT "data[0]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;  # PT65B
+LOCATE COMP "data[1]" SITE "A18"; IOBUF PORT "data[1]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;  # PT65A
+LOCATE COMP "data[2]" SITE "C2";  IOBUF PORT "data[2]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;  # PL14D
+LOCATE COMP "data[3]" SITE "B20"; IOBUF PORT "data[3]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;  # PT67B
+LOCATE COMP "req" SITE "E2"; IOBUF PORT "req" IO_TYPE=LVCMOS33 PULLMODE=DOWN;           # PL23D
+LOCATE COMP "ack" SITE "A19"; IOBUF PORT "ack" IO_TYPE=LVCMOS33 DRIVE=8;                # PT67A
+
+# --- Level Sensors (2 Water Levels) ---
+LOCATE COMP "level_sensor_a" SITE "E3"; IOBUF PORT "level_sensor_a" IO_TYPE=LVCMOS33 PULLMODE=UP;   # PL11B
+LOCATE COMP "level_sensor_b" SITE "C3"; IOBUF PORT "level_sensor_b" IO_TYPE=LVCMOS33 PULLMODE=UP;   # PL8C
+
+# --- PWM Outputs for Actuators (2 Pumps) ---
+LOCATE COMP "pwm_pump_a" SITE "N17"; IOBUF PORT "pwm_pump_a" IO_TYPE=LVCMOS33 DRIVE=8;  # PR35A
+LOCATE COMP "pwm_pump_b" SITE "P18"; IOBUF PORT "pwm_pump_b" IO_TYPE=LVCMOS33 DRIVE=8;  # PR38D
+
+# --- Alive ---
+LOCATE COMP "alive" SITE "B1"; IOBUF PORT "alive" IO_TYPE=LVCMOS33 DRIVE=8;  # PL14B
+
+# --- Connection ---
+LOCATE COMP "led_connection" SITE "L2"; IOBUF  PORT "led_connection" IO_TYPE=LVCMOS33;

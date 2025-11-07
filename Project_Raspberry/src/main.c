@@ -6,6 +6,8 @@
 #include "task_pagination.h"
 #include "task_handshake.h"
 
+
+
 QueueHandle_t queue_sensors_data = NULL;
 QueueHandle_t queue_normalized_sensors_data = NULL;
 QueueHandle_t queue_notifications = NULL;

@@ -5,9 +5,24 @@
 #define DATA_PH_PIN 19
 #define DATA_TDS_PIN 20
 #define DATA_BUTTON_PIN 4
+#define FPGA_RESET_PIN 16
+#define FPGA_ALIVE_PIN 17
 
 volatile uint32_t out_mask;
 volatile int timeout_ms = 0;
+
+void reset_fpga_setup(void){
+    // Initializes the check pins
+    gpio_init(FPGA_RESET_PIN); gpio_set_dir(FPGA_RESET_PIN, GPIO_OUT);
+    gpio_init(FPGA_ALIVE_PIN); gpio_set_dir(FPGA_ALIVE_PIN, GPIO_IN);
+
+    while(!gpio_get(FPGA_ALIVE_PIN)){
+        gpio_put(FPGA_RESET_PIN, 0);
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+
+    gpio_put(FPGA_RESET_PIN, 1);
+}
 
 void handshake_setup(void){
     out_mask = (1 << DATA_TEMPERATURE_PIN) | (1 << DATA_PH_PIN) |

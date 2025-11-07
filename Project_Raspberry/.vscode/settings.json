@@ -58,6 +58,7 @@
         "queue.h": "c",
         "sensor_configs.h": "c",
         "i2c_configs.h": "c",
-        "i2c.h": "c"
+        "i2c.h": "c",
+        "notifications.h": "c"
     }
 }

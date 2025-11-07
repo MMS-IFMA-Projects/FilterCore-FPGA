@@ -4,8 +4,9 @@ module filter_core_design (
 
     // Interface with Pico
     input wire [3:0] data, 
-    input wire req, 
+    input wire req,
     output logic ack,
+    output logic alive,
 
     // Float Sensor Interface
     input wire level_sensor_b, // '1' = EMPTY, '0' = WET
@@ -13,8 +14,16 @@ module filter_core_design (
 
     // Pump PWM Outputs
     output logic pwm_pump_a,
-    output logic pwm_pump_b
+    output logic pwm_pump_b,
+
+    // Connection LED
+    output logic led_connection
 );
+
+    // Internal Reset
+    logic internal_reset;
+    assign internal_reset = ~reset;
+
 
     // --- Wires to connect modules ---
     logic       new_data_pulse;         // From handshake to FSM
@@ -28,7 +37,7 @@ module filter_core_design (
     // Manages REQ/ACK, validates data, and provides a pulse when new data arrives.
     handshake_fsm #( .DATA_WIDTH(4) ) inst_handshake (
         .clk(clk), 
-        .reset(reset),
+        .reset(internal_reset),
         .data(data), 
         .req(req), 
         .ack(ack),
@@ -37,8 +46,8 @@ module filter_core_design (
 
     // --- 2. Data Latch ---
     // Uses the pulse from the handshake to latch the input data.
-    always_ff @(posedge clk or posedge reset) begin
-        if (reset) reg_strategic_status <= 4'b0;
+    always_ff @(posedge clk or posedge internal_reset) begin
+        if (internal_reset) reg_strategic_status <= 4'b0;
          else if (new_data_pulse) reg_strategic_status <= data;
     end
 
@@ -49,7 +58,7 @@ module filter_core_design (
         .STABLE_MS(20)
     ) inst_water_level_a (
         .clk(clk),
-        .reset(reset),
+        .reset(internal_reset),
         .signal_async(level_sensor_a),
         .signal_stable(level_a_is_full)
     );
@@ -61,7 +70,7 @@ module filter_core_design (
         .STABLE_MS(20)
     ) inst_water_level_b (
         .clk(clk),
-        .reset(reset),
+        .reset(internal_reset),
         .signal_async(level_sensor_b),
         .signal_stable(level_b_is_empty)
     );
@@ -70,7 +79,7 @@ module filter_core_design (
     // The main brain of the system.
     filter_fsm inst_filter (
         .clk(clk),
-        .reset(reset),
+        .reset(internal_reset),
         .status_data(reg_strategic_status),
         .level_b_empty(level_b_is_empty),
         .level_a_full(level_a_is_full),
@@ -82,16 +91,38 @@ module filter_core_design (
     // Convert the duty cycle values from the FSM into PWM signals.
     pwm_generator pump_a_pwm_gen (
         .clk(clk), 
-        .reset(reset), 
+        .reset(internal_reset), 
         .duty_cycle(pwm_duty_a), 
         .pwm_signal(pwm_pump_a)
     );
     
     pwm_generator pump_b_pwm_gen (
         .clk(clk), 
-        .reset(reset), 
+        .reset(internal_reset), 
         .duty_cycle(pwm_duty_b), 
         .pwm_signal(pwm_pump_b)
     );
+
+    // --- 7. LED Connection and Alive---
+    localparam BLINK_COUNT_MAX = 24'd12_499_999; // (25MHz / 2) - 1 for 500ms
+    logic [23:0] blink_count = '0;
+    logic blink_toggle = 1'b0;
+
+    always_ff @(posedge clk) begin
+        if (reset == 1'b0) begin
+            if (blink_count == BLINK_COUNT_MAX) begin
+                blink_count <= '0;
+                blink_toggle <= ~blink_toggle;
+            end else begin
+                blink_count <= blink_count + 1;
+            end
+        end else begin
+            blink_count <= '0;
+            blink_toggle <= 1'b0;
+        end
+    end
+
+    assign led_connection = (reset == 1'b1) ? 1'b1 : blink_toggle;
+    assign alive = ~reset;
 
 endmodule
