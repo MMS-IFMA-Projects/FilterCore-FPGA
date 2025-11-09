@@ -22,6 +22,7 @@ void reset_fpga_setup(void){
     }
 
     gpio_put(FPGA_RESET_PIN, 1);
+    send_notification(INFO, "FP Connected");
 }
 
 void handshake_setup(void){
