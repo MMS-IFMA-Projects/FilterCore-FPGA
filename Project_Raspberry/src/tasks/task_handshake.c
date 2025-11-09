@@ -19,12 +19,7 @@ static void task_handshake(void *params){
         // Get data from the normalized data queue
         if(xQueueReceive(queue_normalized_sensors_data, &data, portMAX_DELAY)){
             bool success = false;
-            data.temperature = 1;
-            data.ph = 1;
-            data.tds = 1;
-            data.button_state = 1;
-
-
+            
             for(int retry = 1; retry <= HANDSHAKE_MAX_RETRIES && !success; retry++){
                 // Submit request
                 handshake_request(data);

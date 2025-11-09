@@ -18,18 +18,11 @@ static void task_sensors(void *params) {
         ppm_t tds = tds_meter_read_ppm(temperature);
         bool button_state = get_button_a();
 
-        // sensors_data_t data = {
-        //     .temperature = temperature,
-        //     .ph = ph,
-        //     .tds = tds,
-        //     .button_state = button_state
-        // };
-
         sensors_data_t data = {
-            .temperature = 30.0f,
-            .ph = 4.0f,
-            .tds = 1024.0f,
-            .button_state = 1
+            .temperature = temperature,
+            .ph = ph,
+            .tds = tds,
+            .button_state = button_state
         };
 
         normalized_sensors_data_t normalized_data = analyzer_process_data(data);
@@ -38,13 +31,9 @@ static void task_sensors(void *params) {
         if(button_state) send_notification(INFO, "Manual Start");
 
         // Sending sensor data to the queue
-        // if(xQueueSend(queue_sensors_data, &data, pdMS_TO_TICKS(100)) != pdPASS) 
-        //     send_notification(ERROR, "PI Data Fail");
         xQueueOverwrite(queue_sensors_data, &data);
 
         // Sending normalized data to the queue
-        // if(xQueueSend(queue_normalized_sensors_data, &normalized_data, pdMS_TO_TICKS(100)) != pdPASS) 
-        //     send_notification(ERROR, "FPGA N Fail");
         xQueueOverwrite(queue_normalized_sensors_data, &normalized_data);
 
         vTaskDelay(pdMS_TO_TICKS(SENSORS_INTERVAL_MS));

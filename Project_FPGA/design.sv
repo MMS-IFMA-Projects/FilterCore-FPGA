@@ -124,7 +124,7 @@ module filter_core_design (
         end
     end
 
-    assign led_connection = data_is_critical;
+    assign led_connection = (reset == 1'b1) ? 1'b1 : blink_toggle;
     assign alive = ~reset;
 
 endmodule
