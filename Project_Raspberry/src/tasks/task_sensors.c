@@ -18,10 +18,17 @@ static void task_sensors(void *params) {
         ppm_t tds = tds_meter_read_ppm(temperature);
         bool button_state = get_button_a();
 
+        // sensors_data_t data = {
+        //     .temperature = temperature,
+        //     .ph = ph,
+        //     .tds = tds,
+        //     .button_state = button_state
+        // };
+
         sensors_data_t data = {
-            .temperature = temperature,
-            .ph = ph,
-            .tds = tds,
+            .temperature = 30.0f,
+            .ph = 4.0f,
+            .tds = 1024.0f,
             .button_state = button_state
         };
 
