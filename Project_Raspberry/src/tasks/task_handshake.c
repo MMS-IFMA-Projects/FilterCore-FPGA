@@ -36,8 +36,8 @@ static void task_handshake(void *params){
             }
 
             if(!success) send_notification(ERROR, "HS Failed!");
+            else send_notification(INFO, "HS Success!");
         }
-
         vTaskDelay(pdMS_TO_TICKS(HANDSHAKE_INTERVAL_MS));
     }
 }
