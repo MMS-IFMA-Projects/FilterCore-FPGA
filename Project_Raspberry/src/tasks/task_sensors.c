@@ -38,12 +38,14 @@ static void task_sensors(void *params) {
         if(button_state) send_notification(INFO, "Manual Start");
 
         // Sending sensor data to the queue
-        if(xQueueSend(queue_sensors_data, &data, pdMS_TO_TICKS(100)) != pdPASS) 
-            send_notification(ERROR, "PI Data Fail");
+        // if(xQueueSend(queue_sensors_data, &data, pdMS_TO_TICKS(100)) != pdPASS) 
+        //     send_notification(ERROR, "PI Data Fail");
+        xQueueOverwrite(queue_sensors_data, &data);
 
         // Sending normalized data to the queue
-        if(xQueueSend(queue_normalized_sensors_data, &normalized_data, pdMS_TO_TICKS(100)) != pdPASS) 
-            send_notification(ERROR, "FPGA N Fail");
+        // if(xQueueSend(queue_normalized_sensors_data, &normalized_data, pdMS_TO_TICKS(100)) != pdPASS) 
+        //     send_notification(ERROR, "FPGA N Fail");
+        xQueueOverwrite(queue_normalized_sensors_data, &normalized_data);
 
         vTaskDelay(pdMS_TO_TICKS(SENSORS_INTERVAL_MS));
     }
