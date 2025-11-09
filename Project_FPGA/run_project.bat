@@ -10,7 +10,7 @@ REM ============================================================
 
 set OSSCAD=C:\oss-cad-suite
 
-set PROJETO=C:\Users\Mayro\OneDrive\Embarca Tech\FilterCore-FPGA\Project_FPGA\build
+set PROJETO=C:\Users\dsrtu\Documents\Davi\EmbarcaTech\Projetos\Projeto FPGA\FilterCore-FPGA\Project_FPGA\build
 
 set BIT=impl\filtercore_impl.bit
 
