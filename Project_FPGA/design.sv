@@ -54,7 +54,7 @@ module filter_core_design (
     // --- 3. Water Level Sensor A ---
     // Cleans the mechanical sensor signal.
     water_level #(
-        .CLK_FREQ(50_000_000),
+        .CLK_FREQ(25_000_000),
         .STABLE_MS(20)
     ) inst_water_level_a (
         .clk(clk),
@@ -66,7 +66,7 @@ module filter_core_design (
      // --- 4. Water Level Sensor B ---
     // Cleans the mechanical sensor signal.
     water_level #(
-        .CLK_FREQ(50_000_000),
+        .CLK_FREQ(25_000_000),
         .STABLE_MS(20)
     ) inst_water_level_b (
         .clk(clk),
