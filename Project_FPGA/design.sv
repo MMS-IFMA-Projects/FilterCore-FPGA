@@ -32,6 +32,7 @@ module filter_core_design (
     logic [7:0] pwm_duty_a;           // From FSM to PWM_A
     logic [7:0] pwm_duty_b;           // From FSM to PWM_B
     logic [3:0] reg_strategic_status;   // Local register for status
+    logic       data_is_critical;
 
     // --- 1. Handshake Receiver ---
     // Manages REQ/ACK, validates data, and provides a pulse when new data arrives.
@@ -84,7 +85,8 @@ module filter_core_design (
         .level_b_empty(level_b_is_empty),
         .level_a_full(level_a_is_full),
         .pwm_duty_a(pwm_duty_a),
-        .pwm_duty_b(pwm_duty_b)
+        .pwm_duty_b(pwm_duty_b),
+        .is_critical(data_is_critical)
     );
 
     // --- 6. PWM Generators ---
@@ -122,7 +124,7 @@ module filter_core_design (
         end
     end
 
-    assign led_connection = (reset == 1'b1) ? 1'b1 : blink_toggle;
+    assign led_connection = data_is_critical;
     assign alive = ~reset;
 
 endmodule

@@ -12,6 +12,8 @@ module filter_fsm #(
     // Output to PWM generator
     output logic [7:0] pwm_duty_a,
     output logic [7:0] pwm_duty_b
+
+    output logic is_critical;
 );
 
     // --- Parameters ---
@@ -34,7 +36,6 @@ module filter_fsm #(
     logic pump_b_timer_expired;
 
     // --- System criticality variable ---
-    wire is_critical;
     assign is_critical = (|status_data);
 
     // --- Pump B Timer (Min/Max Timer) ---
