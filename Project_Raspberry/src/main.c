@@ -16,7 +16,7 @@ int main(){
     stdio_init_all();
 
     //Serial monitor debugging
-    while (!stdio_usb_connected()) sleep_ms(200);
+    //while (!stdio_usb_connected()) sleep_ms(200);
 
     i2c0_configs(I2C_BAUDRATE_DEFAULT);
 
