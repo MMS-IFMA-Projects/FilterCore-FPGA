@@ -118,7 +118,7 @@ module filter_core_design (
             end
         end else begin
             blink_count <= '0;
-            blink_toggle <= 1'b0;
+            blink_toggle <= 1'b1;
         end
     end
 
