@@ -29,7 +29,7 @@ static void task_sensors(void *params) {
             .temperature = 30.0f,
             .ph = 4.0f,
             .tds = 1024.0f,
-            .button_state = button_state
+            .button_state = 1
         };
 
         normalized_sensors_data_t normalized_data = analyzer_process_data(data);
