@@ -11,9 +11,9 @@ module filter_fsm #(
     
     // Output to PWM generator
     output logic [7:0] pwm_duty_a,
-    output logic [7:0] pwm_duty_b
+    output logic [7:0] pwm_duty_b,
 
-    output logic is_critical;
+    output logic is_critical
 );
 
     // --- Parameters ---
