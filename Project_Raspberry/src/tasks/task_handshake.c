@@ -4,6 +4,17 @@
 
 #define HANDSHAKE_INTERVAL_MS 250
 
+/**
+ * @brief Função da task principal para comunicação via handshake com o FPGA.
+ * @note Esta task é responsável por:
+ * 1. Inicializar e resetar o FPGA ('reset_fpga_setup', 'handshake_setup').
+ * 2. Bloquear aguardando dados na 'queue_normalized_sensors_data'.
+ * 3. Ao receber dados, executar o protocolo de handshake (Request, Wait for ACK).
+ * 4. Tentar novamente (até HANDSHAKE_MAX_RETRIES) em caso de falha no ACK.
+ * 5. Enviar notificações de sucesso ou falha na comunicação.
+ * 6. Atrasar (vTaskDelay) antes de aguardar os próximos dados.
+ * * @param params Parâmetros de inicialização da task (não utilizados).
+ */
 static void task_handshake(void *params){
     printf("[Started] | [Task 4] | [Handshake]\n");
 
@@ -42,6 +53,10 @@ static void task_handshake(void *params){
     }
 }
 
+/**
+ * @brief Cria e inicia a task de handshake com o FPGA (task_handshake).
+ * @note A task é criada com prioridade (IDLE + 2) e afinidade com o Core 1.
+ */
 void create_task_handshake(void){
     TaskHandle_t handle;
     BaseType_t status = xTaskCreate(

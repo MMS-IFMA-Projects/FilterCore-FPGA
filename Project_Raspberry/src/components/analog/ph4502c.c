@@ -10,6 +10,11 @@
 #define CALIBRATION_OFFSET 58.2470f
 #define VOLTS_TO_PH_SLOPE -20.4082f
 
+/**
+ * @brief Ordena um array de amostras (int16_t) usando bubble sort.
+ * @note Esta função modifica o array de entrada.
+ * * @param samples Ponteiro para o array de amostras a ser ordenado.
+ */
 static void sort_samples(int16_t* samples) {
     // Simple bubble sort
     for (int i = 0; i < NUM_SAMPLES - 1; i++) {
@@ -23,7 +28,12 @@ static void sort_samples(int16_t* samples) {
     }
 }
 
-// Calibration
+/**
+ * @brief Lê a tensão do sensor de pH a partir do ADC.
+ * * Coleta 10 amostras, ordena, descarta as 2 menores e 2 maiores,
+ * e calcula a média das 6 amostras restantes antes de converter para tensão.
+ * * @return O valor da tensão média medida em Volts.
+ */
 static float ph4502c_read_voltage(void) {
     int16_t samples[NUM_SAMPLES];
     int32_t total_raw_adc = 0;
@@ -44,6 +54,12 @@ static float ph4502c_read_voltage(void) {
     return voltage;
 }
 
+/**
+ * @brief Função auxiliar para testes de calibração.
+ * @note Esta função lê a tensão e imprime no console valores de
+ * calibração (slope/offset) baseados em valores fixos (hardcoded).
+ * Não é usada na leitura normal de pH.
+ */
 static void ph4502c_calibrate(void) {
     float acid_ph = 4.2f; //replace with acid pH
     float base_ph = 6.9f; //replace with base pH
@@ -60,6 +76,13 @@ static void ph4502c_calibrate(void) {
     printf("Offset: %.4f\n", offset);
 }
 
+/**
+ * @brief Realiza a leitura completa do valor de pH.
+ * * Coleta 10 amostras do ADC, descarta 40% (outliers), calcula a tensão média,
+ * e aplica a fórmula de calibração linear (slope e offset) para
+ * converter a tensão em valor de pH.
+ * * @return O valor de pH medido (tipo ph_t).
+ */
 ph_t ph4502c_read_ph(void) {
     int16_t samples[NUM_SAMPLES];
     int32_t total_raw_adc = 0;

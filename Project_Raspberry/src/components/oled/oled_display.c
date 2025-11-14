@@ -4,18 +4,37 @@
 #include <stdio.h>
 #include "hardware/gpio.h"
 
+/**
+ * @brief Envia um único byte de comando para o display OLED via I2C.
+ * * @param oled Ponteiro para a estrutura ssd1306_t.
+ * @param command O byte de comando a ser enviado.
+ */
 static void ssd1306_send_command(ssd1306_t* oled, uint8_t command) {
     oled->port_buffer[0] = 0x80; // Control byte for command
     oled->port_buffer[1] = command;
     i2c_write_blocking(oled->i2c_port, oled->address, oled->port_buffer, 2, false);
 }
 
+/**
+ * @brief Envia uma lista de bytes de comando para o display OLED.
+ * * @param oled Ponteiro para a estrutura ssd1306_t.
+ * @param commands Ponteiro para o array de comandos.
+ * @param len O número de comandos no array.
+ */
 static void ssd1306_send_command_list(ssd1306_t* oled, const uint8_t* commands, size_t len) {
     for (size_t i = 0; i < len; i++) {
         ssd1306_send_command(oled, commands[i]);
     }
 }
 
+/**
+ * @brief Inicializa a estrutura ssd1306_t e o hardware do display OLED.
+ * @note Aloca memória para o ram_buffer, configura o I2C e envia a sequência 
+ * de inicialização de comandos para o SSD1306.
+ * * @param oled Ponteiro para a estrutura ssd1306_t a ser inicializada.
+ * @return true se a inicialização for bem-sucedida (especialmente a alocação de memória), 
+ * false caso contrário.
+ */
 bool oled_init(ssd1306_t* oled) {
     if(!oled) return false;
 
@@ -55,11 +74,23 @@ bool oled_init(ssd1306_t* oled) {
     return true;
 }
 
+/**
+ * @brief Limpa o buffer da RAM do OLED (preenche com 0x00).
+ * @note Isto limpa apenas o buffer local. Chame oled_render() para 
+ * enviar o buffer limpo para o display.
+ * @note O byte de controle (índice 0) não é zerado.
+ * * @param oled Ponteiro para a estrutura ssd1306_t.
+ */
 void oled_clear(ssd1306_t* oled) {
     if(!oled || !oled->ram_buffer) return;
     memset(&oled->ram_buffer[1], 0x00, oled->buffer_size - 1);
 }
 
+/**
+ * @brief Envia o conteúdo do ram_buffer local para a RAM do display OLED.
+ * @note Esta função atualiza o display físico com o que foi desenhado no buffer.
+ * * @param oled Ponteiro para a estrutura ssd1306_t.
+ */
 void oled_render(ssd1306_t* oled) {
     if(!oled || !oled->ram_buffer) return;
 

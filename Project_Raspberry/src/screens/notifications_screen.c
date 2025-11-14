@@ -3,6 +3,14 @@
 
 #define LINE_ONE 0
 
+/**
+ * @brief Exibe a tela de notificações no OLED.
+ * @note Esta tela limpa o display, mostra um título e lista as
+ * notificações mais recentes (até MAX_NOTIFICATIONS), prefixando
+ * cada mensagem com seu tipo (IN, AL, ER).
+ * * @param latest_notifications Um ponteiro para um array de estruturas
+ * (notification_t) contendo as notificações a serem exibidas.
+ */
 void show_notifications_screen(notification_t *latest_notifications) {
     oled_clear(&oled);
 

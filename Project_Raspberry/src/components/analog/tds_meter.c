@@ -6,6 +6,12 @@
 #define TDS_ADC_CHANNEL 1
 #define NUM_SAMPLES 30
 
+/**
+ * @brief Calcula o valor mediano de um array de amostras.
+ * @note Esta função modifica o array de entrada (ordena-o).
+ * * @param samples Ponteiro para o array de amostras (será ordenado).
+ * @return O valor mediano do array.
+ */
 static int16_t get_median_value(int16_t *samples){
     // Simple bubble sort
     for (int i = 0; i < NUM_SAMPLES - 1; i++) {
@@ -21,6 +27,15 @@ static int16_t get_median_value(int16_t *samples){
     return samples[(NUM_SAMPLES - 1) / 2];
 }
 
+/**
+ * @brief Lê o valor de TDS (Total de Sólidos Dissolvidos) em PPM.
+ * * Esta função coleta 30 amostras do ADC, encontra a mediana,
+ * converte para tensão, aplica compensação de temperatura e,
+ * finalmente, converte a tensão compensada para PPM.
+ * * @param current_temperature A temperatura atual em Celsius (tipo celsius_t)
+ * para aplicar a compensação.
+ * @return O valor de TDS calculado em PPM (tipo ppm_t).
+ */
 ppm_t tds_meter_read_ppm(celsius_t current_temperature) {
     int16_t samples[NUM_SAMPLES];
 

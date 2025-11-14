@@ -9,6 +9,17 @@
 
 #define SENSORS_INTERVAL_MS 125
 
+/**
+ * @brief Função da task principal para leitura e processamento de sensores.
+ * @note Esta task é responsável por:
+ * 1. Ler os valores de todos os sensores (Temperatura, pH, TDS) e do botão A.
+ * 2. Agrupar os dados brutos na estrutura 'sensors_data_t'.
+ * 3. Chamar 'analyzer_process_data' para gerar dados normalizados (alertas).
+ * 4. Enviar os dados brutos para 'queue_sensors_data' (para o display).
+ * 5. Enviar os dados normalizados para 'queue_normalized_sensors_data' (para o handshake).
+ * 6. Atrasar (vTaskDelay) antes de repetir.
+ * * @param params Parâmetros de inicialização da task (não utilizados).
+ */
 static void task_sensors(void *params) {
     printf("[Started] | [Task 2] | [Sensors Reading]\n");
 
@@ -40,6 +51,11 @@ static void task_sensors(void *params) {
     }
 }
 
+/**
+ * @brief Cria e inicia a task de leitura de sensores (task_sensors).
+ * @note Inicializa o botão A antes de criar a task.
+ * A task é criada com alta prioridade (IDLE + 4) e afinidade com o Core 0.
+ */
 void create_task_sensors(void) {
     init_button_a();
 

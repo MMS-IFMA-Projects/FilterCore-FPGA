@@ -1,6 +1,13 @@
 #include "oled_prints.h"
 #include "ssd1306_symbols_large.h"
 
+/**
+ * @brief Desenha um bitmap de símbolo/caractere grande (altura > 8 pixels) no buffer do OLED.
+ * * @param oled Ponteiro para a estrutura ssd1306_t.
+ * @param bitmap Ponteiro para o array de bytes do bitmap (formato vertical).
+ * @param x Posição X inicial (canto esquerdo) onde o bitmap será desenhado.
+ * @param start_y Página (linha de 8 pixels) Y inicial onde o bitmap será desenhado.
+ */
 static void print_large_symbol(ssd1306_t* oled, const uint8_t* bitmap, uint8_t x, uint8_t start_y) {
     for(uint8_t col = 0; col < SSD1306_CHAR_LARGE_WIDTH; col++) {
         for(uint8_t page = 0; page < SSD1306_CHAR_LARGE_PAGES; page++) {
@@ -14,6 +21,14 @@ static void print_large_symbol(ssd1306_t* oled, const uint8_t* bitmap, uint8_t x
     }
 }
 
+/**
+ * @brief Mapeia um caractere para seu bitmap grande correspondente e o desenha.
+ * @note Suporta apenas '0'-'9', '+', '-', '.' e ' '.
+ * * @param oled Ponteiro para a estrutura ssd1306_t.
+ * @param c O caractere a ser desenhado.
+ * @param x Posição X inicial.
+ * @param start_y Página Y inicial.
+ */
 static void print_large_char(ssd1306_t* oled, char c, uint8_t x, uint8_t start_y) {
     const uint8_t *bitmap = NULL;
 
@@ -27,17 +42,34 @@ static void print_large_char(ssd1306_t* oled, char c, uint8_t x, uint8_t start_y
     if(bitmap) print_large_symbol(oled, bitmap, x, start_y);
 }
 
-
+/**
+ * @brief Desenha uma string de texto de tamanho normal centralizada horizontalmente em uma linha.
+ * * @param oled Ponteiro para a estrutura ssd1306_t.
+ * @param text A string de texto (UTF-8) a ser desenhada.
+ * @param line O número da linha (página, 0-7) onde o texto será desenhado.
+ */
 void print_text_center(ssd1306_t* oled, const char* text, uint8_t line) {
     int text_length = strlen(text);
     int x = (oled->width - (text_length * SSD1306_CHAR_WIDTH)) / 2; // Each character is 8 pixels wide
     ssd1306_draw_utf8_multiline(oled->ram_buffer, x, line * SSD1306_CHAR_HEIGHT, text, oled->width, oled->height);
 }
 
+/**
+ * @brief Desenha uma string de texto de tamanho normal alinhada à esquerda em uma linha.
+ * * @param oled Ponteiro para a estrutura ssd1306_t.
+ * @param text A string de texto (UTF-8) a ser desenhada.
+ * @param line O número da linha (página, 0-7) onde o texto será desenhado.
+ */
 void print_text_left(ssd1306_t* oled, const char* text, uint8_t line) {
     ssd1306_draw_utf8_multiline(oled->ram_buffer, 0, line * SSD1306_CHAR_HEIGHT, text, oled->width, oled->height);
 }
 
+/**
+ * @brief Desenha uma string de texto grande (usando print_large_char) centralizada horizontalmente.
+ * * @param oled Ponteiro para a estrutura ssd1306_t.
+ * @param text A string de texto (contendo '0'-'9', '+', '-', '.') a ser desenhada.
+ * @param start_line A página Y inicial para o topo do texto grande.
+ */
 void print_large_text_center(ssd1306_t* oled, const char* text, uint8_t start_line) {
     int text_length = strlen(text);
     int total_text_width = text_length * SSD1306_CHAR_LARGE_WIDTH;

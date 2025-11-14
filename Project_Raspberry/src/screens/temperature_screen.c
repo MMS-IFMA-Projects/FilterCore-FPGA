@@ -5,6 +5,13 @@
 #define LINE_ONE 0
 #define LINE_WITH_MARGIN 2
 
+/**
+ * @brief Exibe a tela dedicada ao sensor de Temperatura no OLED.
+ * @note Limpa o display, mostra um título, o estado (NORMAL/ALERT)
+ * e o valor numérico da temperatura em fonte grande.
+ * * @param latest_data Estrutura (sensors_data_t) contendo os dados
+ * mais recentes dos sensores (usará especificamente o valor de temperatura).
+ */
 void show_temperature_screen(sensors_data_t latest_data) {
     oled_clear(&oled);
 

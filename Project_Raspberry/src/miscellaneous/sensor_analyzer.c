@@ -2,16 +2,42 @@
 #include "sensor_configs.h"
 #include "notifications.h"
 
+/**
+ * @brief Armazena o estado normalizado (alertas) da leitura anterior.
+ * @note Usado para detectar mudanças de estado (ex: transição de 'normal' para 'alerta')
+ * e enviar notificações apenas uma vez por evento.
+ */
 static normalized_sensors_data_t prev_normalized_data = {0};
 
+/**
+ * @brief Verifica se a temperatura está fora dos limites seguros.
+ * * @param temperature O valor da temperatura em Celsius.
+ * @return true se a temperatura estiver abaixo do mínimo ou acima do máximo,
+ * false caso contrário.
+ */
 bool analyzer_is_temperature_alert(celsius_t temperature){
     return temperature < MIN_TEMPERATURE_CELSIUS || temperature > MAX_TEMPERATURE_CELSIUS;
 }
 
+/**
+ * @brief Verifica se o pH está fora dos limites seguros.
+ * * @param ph O valor do pH.
+ * @return true se o pH estiver abaixo do mínimo ou acima do máximo,
+ * false caso contrário.
+ */
 bool analyzer_is_ph_alert(ph_t ph){
     return ph < MIN_PH || ph > MAX_PH;
 }
 
+/**
+ * @brief Verifica se o TDS está acima do limite máximo permitido.
+ * @note O limite máximo de TDS é dinâmico e depende dos valores
+ * atuais de temperatura e pH, conforme as faixas definidas.
+ * * @param data Estrutura (sensors_data_t) contendo os valores brutos
+ * de tds, ph e temperatura.
+ * @return true se o TDS estiver acima do limite máximo calculado,
+ * false caso contrário.
+ */
 bool analyzer_is_tds_alert(sensors_data_t data){
     ppm_t max_tds = MAX_DEFAULT_TDS;
 
@@ -27,6 +53,11 @@ bool analyzer_is_tds_alert(sensors_data_t data){
     return (data.tds > max_tds);
 }
 
+/**
+ * @brief Inicializa o estado do analisador.
+ * @note Zera a estrutura 'prev_normalized_data' para garantir que
+ * a primeira análise de dados funcione corretamente.
+ */
 void analyzer_init(void){
     prev_normalized_data.temperature = 0;
     prev_normalized_data.ph = 0;
@@ -34,6 +65,15 @@ void analyzer_init(void){
     prev_normalized_data.button_state = 0;
 }
 
+/**
+ * @brief Processa os dados brutos dos sensores e gera dados normalizados (alertas).
+ * @note Esta função converte os valores dos sensores em estados binários (alerta/normal)
+ * e compara com o estado anterior (prev_normalized_data) para enviar
+ * notificações apenas na transição de normal para alerta.
+ * * @param data Estrutura (sensors_data_t) com os valores brutos atuais dos sensores.
+ * @return Uma estrutura (normalized_sensors_data_t) com os estados
+ * binários de alerta para cada sensor.
+ */
 normalized_sensors_data_t analyzer_process_data(sensors_data_t data){
     normalized_sensors_data_t new_data;
 

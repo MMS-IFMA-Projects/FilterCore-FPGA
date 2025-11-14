@@ -13,6 +13,17 @@
 
 #define DISPLAY_INTERVAL_MS 250
 
+/**
+ * @brief Função da task principal para gerenciar o display OLED.
+ * @note Esta task é responsável por:
+ * 1. Obter o mutex do OLED para acesso seguro.
+ * 2. Verificar a variável global 'current_screen' para decidir qual tela renderizar.
+ * 3. Tentar ler os dados mais recentes da 'queue_sensors_data' (sem bloquear).
+ * 4. Chamar a função 'show_...' apropriada para desenhar a tela.
+ * 5. Na tela de notificação, consome itens da 'queue_notifications' e os exibe.
+ * 6. Liberar o mutex e atrasar (vTaskDelay) antes de repetir.
+ * * @param params Parâmetros de inicialização da task (não utilizados).
+ */
 static void task_display(void *params) {
     printf("[Started] | [Task 1] | [Display Printing]\n");
 
@@ -83,6 +94,10 @@ static void task_display(void *params) {
 
 }
 
+/**
+ * @brief Cria e inicia a task de gerenciamento do display (task_display).
+ * @note A task é criada com prioridade (IDLE + 2) e afinidade com o Core 1.
+ */
 void create_task_display(void) {
    TaskHandle_t handle;
    BaseType_t status = xTaskCreate(

@@ -4,6 +4,11 @@
 #include <string.h>
 #include <stdbool.h>
 
+/**
+ * @brief Converte um caractere (ASCII/ISO-8859-1) em um índice para a tabela de fontes (font[]).
+ * * @param character O caractere a ser procurado.
+ * @return O índice correspondente na tabela de fontes. Retorna 0 (espaço) para caracteres inválidos.
+ */
 static inline int ssd1306_get_font(uint8_t character) {
     if (character >= 'A' && character <= 'Z') return character - 'A' + 1;
     if (character >= '0' && character <= '9') return character - '0' + 27;
@@ -49,6 +54,15 @@ static inline int ssd1306_get_font(uint8_t character) {
     return 0; // caractere inválido
 }
 
+/**
+ * @brief Desenha um único caractere de tamanho normal (8x8) no buffer SSD.
+ * * @param ssd Ponteiro para o ram_buffer (iniciando com o byte de controle).
+ * @param x Posição X inicial (canto esquerdo).
+ * @param y Posição Y inicial (em pixels, será convertida para página).
+ * @param character O caractere a ser desenhado.
+ * @param width A largura total do display (para cálculo de página).
+ * @param height A altura total do display (para verificação de limites).
+ */
 void ssd1306_draw_char(uint8_t *ssd, int16_t x, int16_t y, uint8_t character, uint8_t width, uint8_t height) {
     if (x > width - SSD1306_CHAR_WIDTH || y > height - SSD1306_CHAR_HEIGHT) return;
     y /= SSD1306_CHAR_HEIGHT; // Convert y to page number
@@ -59,6 +73,15 @@ void ssd1306_draw_char(uint8_t *ssd, int16_t x, int16_t y, uint8_t character, ui
     }
 }
 
+/**
+ * @brief Desenha uma string de caracteres de tamanho normal (8x8) no buffer SSD.
+ * * @param ssd Ponteiro para o ram_buffer.
+ * @param x Posição X inicial.
+ * @param y Posição Y inicial (em pixels).
+ * @param string Ponteiro para a string (terminada em null).
+ * @param width A largura total do display.
+ * @param height A altura total do display.
+ */
 void ssd1306_draw_string(uint8_t *ssd, int16_t x, int16_t y, const char *string, uint8_t width, uint8_t height)
  {
     while (*string) {
@@ -67,6 +90,17 @@ void ssd1306_draw_string(uint8_t *ssd, int16_t x, int16_t y, const char *string,
     }
 }
 
+/**
+ * @brief Desenha uma string no buffer SSD com suporte a UTF-8 (limitado) e quebra de linha.
+ * @note Suporta caracteres UTF-8 de 2 bytes (comuns em português) e quebra
+ * a linha automaticamente se o texto exceder a largura do display.
+ * * @param ssd Ponteiro para o ram_buffer.
+ * @param x Posição X inicial.
+ * @param y Posição Y inicial (em pixels).
+ * @param utf8_string Ponteiro para a string (terminada em null).
+ * @param width A largura total do display (usada para quebra de linha).
+ * @param height A altura total do display (usada para quebra de linha).
+ */
 void ssd1306_draw_utf8_multiline(uint8_t *ssd, int16_t x, int16_t y, const char *utf8_string, uint8_t width, uint8_t height) {
     const int char_width = SSD1306_CHAR_WIDTH;
     const int char_height = SSD1306_CHAR_HEIGHT;
