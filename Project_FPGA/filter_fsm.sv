@@ -1,44 +1,63 @@
+/**
+ * @brief Máquina de estados finitos (FSM) para o controle da filtragem.
+ * @details Gerencia a lógica de enchimento e drenagem dos tanques
+ * controlando duas bombas (A e B) com base nos níveis
+ * dos sensores e no status de criticidade do sistema.
+ *
+ * @param PUMP_B_TIMER_CYCLES Duração (em ciclos de clock) que a bomba B
+ * opera no modo 'DRAINING_MIN' antes de
+ * passar para 'DRAINING_MAX'.
+ */
 module filter_fsm #(
     parameter int PUMP_B_TIMER_CYCLES = 250_000_000 // 5 seconds @ 50 MHz
 ) (
-    input wire clk,
-    input wire reset,
+    input wire clk,                 // Clock do sistema
+    input wire reset,               // Reset síncrono (ativo alto)
 
     // Input from other modules
-    input wire [3:0] status_data,
-    input wire level_b_empty,
-    input wire level_a_full,
+    input wire [3:0] status_data,   // Dados de status (criticidade) vindos do Pico
+    input wire level_b_empty,       // Sensor de nível B (1 = Vazio)
+    input wire level_a_full,        // Sensor de nível A (1 = Não cheio)
     
     // Output to PWM generator
-    output logic [7:0] pwm_duty_a,
-    output logic [7:0] pwm_duty_b,
+    output logic [7:0] pwm_duty_a,  // Ciclo de trabalho para a Bomba A
+    output logic [7:0] pwm_duty_b,  // Ciclo de trabalho para a Bomba B
 
-    output logic is_critical
+    output logic is_critical        // Flag (1 bit) indicando criticidade
 );
 
     // --- Parameters ---
-    localparam PWM_MAX = 8'd230;
-    localparam PWM_MIN = 8'd77;
+    localparam PWM_MAX = 8'd230;    // Valor de duty cycle para potência máxima
+    localparam PWM_MIN = 8'd77;     // Valor de duty cycle para potência mínima
+
 
     // --- FSM States ---
+    /**
+     * @brief Definição dos estados da FSM de controle.
+     */
     typedef enum logic [2:0] {
-        STOP,
-        FILLING,
-        DRAINING_MIN,
-        DRAINING_MAX,
-        STOPPING
+        STOP,           // 0: Ambas as bombas paradas
+        FILLING,        // 1: Enchendo tanque A, esvaziando B (se não vazio)
+        DRAINING_MIN,   // 2: Drenando B com potência mínima (modo timer)
+        DRAINING_MAX,   // 3: Drenando B com potência máxima (timer expirou)
+        STOPPING        // 4: Esvaziando B antes de parar totalmente
     } state_t;
 
     state_t current_state, next_state;
 
     // --- Timers ---
-    logic [27:0] timer_pump_b;
-    logic pump_b_timer_expired;
+    logic [27:0] timer_pump_b;  // Contador para o estado DRAINING_MIN
+    logic pump_b_timer_expired; // Flag de expiração do timer
 
     // --- System criticality variable ---
+    // O sistema é considerado crítico se qualquer bit de status estiver ativo
     assign is_critical = (|status_data);
 
     // --- Pump B Timer (Min/Max Timer) ---
+    /**
+     * @brief Temporizador para a Bomba B (estados de drenagem).
+     * @details Conta apenas durante o estado DRAINING_MIN.
+     */
     always_ff @(posedge clk or posedge reset) begin
         if (reset) timer_pump_b <= '0;
         else if (current_state == DRAINING_MIN) begin
@@ -47,9 +66,13 @@ module filter_fsm #(
         else timer_pump_b <= '0;
     end
 
+    // Sinal de expiração do temporizador
     assign pump_b_timer_expired = (timer_pump_b >= PUMP_B_TIMER_CYCLES);
 
     // --- FSM State Transition Logic ---
+    /**
+     * @brief Lógica de transição de estados (Combinacional). 
+     */
     always_comb begin
         next_state = current_state;
 
@@ -74,6 +97,9 @@ module filter_fsm #(
     end
 
     // --- FSM Output (Pump Control) ---
+    /**
+     * @brief Lógica de saída (Controle das Bombas).
+     */
     always_comb begin
         pwm_duty_a = 8'h00;
         pwm_duty_b = 8'h00;
@@ -100,6 +126,9 @@ module filter_fsm #(
     end
 
     // --- FSM State Register ---
+    /**
+     * @brief Registrador de estado (Sequencial).
+     */
     always_ff @(posedge clk or posedge reset) begin
         if (reset) current_state <= STOP;
         else current_state <= next_state;

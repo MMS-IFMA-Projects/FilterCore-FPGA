@@ -1,26 +1,35 @@
+/**
+ * @brief Módulo de topo do design "Filter Core".
+ * @details Este módulo integra todos os sub-módulos:
+ * 1. Handshake FSM (para comunicação com o Pico)
+ * 2. Debouncers de Nível de Água (para os sensores)
+ * 3. FSM de Controle (a lógica principal)
+ * 4. Geradores de PWM (para as bombas)
+ */
 module filter_core_design (
-    input wire clk,
-    input wire reset,
+    input wire clk,             // Clock principal (esperado 25MHz)
+    input wire reset,           // Reset global (ativo baixo, vindo do Pico)
 
     // Interface with Pico
-    input wire [3:0] data, 
-    input wire req,
-    output logic ack,
-    output logic alive,
+    input wire [3:0] data,      // Entrada de dados de status (do Pico)
+    input wire req,             // Sinal de Requisição (do Pico)
+    output logic ack,           // Sinal de Reconhecimento (para o Pico)
+    output logic alive,         // Sinal 'vivo' (para o Pico)
 
     // Float Sensor Interface
-    input wire level_sensor_b, // '1' = EMPTY, '0' = WET
-    input wire level_sensor_a, // '1' = NOT FULL (DRY), '0' = FULL (WET)
+    input wire level_sensor_b,  // Sensor Nível B (1=VAZIO, 0=CHEIO)
+    input wire level_sensor_a,  // Sensor Nível A (1=NÃO CHEIO, 0=CHEIO)
 
     // Pump PWM Outputs
-    output logic pwm_pump_a,
-    output logic pwm_pump_b,
+    output logic pwm_pump_a,    // Sinal PWM para Bomba A
+    output logic pwm_pump_b,    // Sinal PWM para Bomba B
 
     // Connection LED
-    output logic led_connection
+    output logic led_connection // LED de conexão/status
 );
 
     // Internal Reset
+    // Inverte o reset (ativo baixo) para reset interno (ativo alto)
     logic internal_reset;
     assign internal_reset = ~reset;
 
