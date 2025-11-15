@@ -35,16 +35,19 @@ module filter_core_design (
 
 
     // --- Wires to connect modules ---
-    logic       new_data_pulse;         // From handshake to FSM
-    logic       level_b_is_empty;         // From water_level to FSM
-    logic       level_a_is_full;         // From water_level to FSM
-    logic [7:0] pwm_duty_a;           // From FSM to PWM_A
-    logic [7:0] pwm_duty_b;           // From FSM to PWM_B
-    logic [3:0] reg_strategic_status;   // Local register for status
-    logic       data_is_critical;
+    logic       new_data_pulse;         // Pulso do Handshake -> Latch de Dados
+    logic       level_b_is_empty;       // Saída estável do Sensor B -> FSM Principal
+    logic       level_a_is_full;        // Saída estável do Sensor A -> FSM Principal
+    logic [7:0] pwm_duty_a;             // Duty cycle da FSM Principal -> PWM A
+    logic [7:0] pwm_duty_b;             // Duty cycle da FSM Principal -> PWM B
+    logic [3:0] reg_strategic_status;   // Registrador local para os dados do Pico
+    logic       data_is_critical;       // Saída de criticidade da FSM Principal
 
     // --- 1. Handshake Receiver ---
-    // Manages REQ/ACK, validates data, and provides a pulse when new data arrives.
+    /**
+     * @brief 1. Receptor de Handshake
+     * @details Gerencia REQ/ACK e gera pulso 'new_data_pulse'
+     */
     handshake_fsm #( .DATA_WIDTH(4) ) inst_handshake (
         .clk(clk), 
         .reset(internal_reset),
@@ -55,14 +58,20 @@ module filter_core_design (
     );
 
     // --- 2. Data Latch ---
-    // Uses the pulse from the handshake to latch the input data.
+    /**
+     * @brief 2. Registrador de Dados (Latch)
+     * @details Captura os dados de entrada usando o pulso do handshake.
+     */
     always_ff @(posedge clk or posedge internal_reset) begin
         if (internal_reset) reg_strategic_status <= 4'b0;
          else if (new_data_pulse) reg_strategic_status <= data;
     end
 
     // --- 3. Water Level Sensor A ---
-    // Cleans the mechanical sensor signal.
+    /**
+     * @brief 3. Estabilizador do Sensor de Nível A
+     * @details Filtra o ruído do sensor mecânico A.
+     */
     water_level #(
         .CLK_FREQ(25_000_000),
         .STABLE_MS(20)
@@ -73,8 +82,11 @@ module filter_core_design (
         .signal_stable(level_a_is_full)
     );
 
-     // --- 4. Water Level Sensor B ---
-    // Cleans the mechanical sensor signal.
+    // --- 4. Water Level Sensor B ---
+    /**
+     * @brief 4. Estabilizador do Sensor de Nível B
+     * @details Filtra o ruído do sensor mecânico B.
+     */
     water_level #(
         .CLK_FREQ(25_000_000),
         .STABLE_MS(20)
@@ -86,7 +98,11 @@ module filter_core_design (
     );
 
     // --- 5. Filter Control FSM ---
-    // The main brain of the system.
+    /**
+     * @brief 5. FSM de Controle da Filtragem
+     * @details O cérebro principal do sistema, decide quando ligar
+     * as bombas com base nos sensores e dados do Pico.
+     */
     filter_fsm inst_filter (
         .clk(clk),
         .reset(internal_reset),
@@ -99,7 +115,11 @@ module filter_core_design (
     );
 
     // --- 6. PWM Generators ---
-    // Convert the duty cycle values from the FSM into PWM signals.
+    /**
+     * @brief 6. Geradores de PWM
+     * @details Convertem os valores de duty cycle em sinais PWM
+     * para acionar as bombas.
+     */
     pwm_generator pump_a_pwm_gen (
         .clk(clk), 
         .reset(internal_reset), 
@@ -115,6 +135,11 @@ module filter_core_design (
     );
 
     // --- 7. LED Connection and Alive---
+    /**
+     * @brief 7. Lógica de LED e Sinal 'Alive'
+     * @details Gera um sinal 'alive' (baseado no reset) e um
+     * LED piscante (a ~500ms) quando não está em reset.
+     */
     localparam BLINK_COUNT_MAX = 24'd12_499_999; // (25MHz / 2) - 1 for 500ms
     logic [23:0] blink_count = '0;
     logic blink_toggle = 1'b0;
@@ -133,7 +158,9 @@ module filter_core_design (
         end
     end
 
+    // LED fica aceso durante o reset, pisca caso contrário
     assign led_connection = (reset == 1'b1) ? 1'b1 : blink_toggle;
+    // Sinal 'alive' está alto enquanto o FPGA estiver fora de reset
     assign alive = ~reset;
 
 endmodule
